@@ -1,4 +1,11 @@
-v0.99.8:
+v0.99.9 RC1 (3/13/2013):
+*) Fixed Rs_Klypin to use bound mass instead of unbound mass for halos when BOUND_PROPS = 1.  (Thanks to Yao-Yuan Mao for finding!).
+*) More efficient memory allocation in tree construction.
+*) New config parameter (RUN_PARALLEL_ON_SUCCESS) which will launch a program from every analysis process after each snapshot is analyzed.  Rockstar will wait for successful completion before continuing.
+*) Fixed segfault in BGC2 output code, as well as a regression that made BGC2 output use twice as much memory as necessary.
+*) Added the INITIAL_METRIC_SCALING parameter to adjust the initial weight given to the velocity-space dispersion.  (Relevant for Chris Moody only).
+
+v0.99.8: (Not publicly released)
 *) Added FORCE_RES_PHYS_MAX configuration parameter to set the maximum physical force resolution---mainly useful for analyzing simulations at a>>1.
 
 v0.99.7: (Not publicly released)

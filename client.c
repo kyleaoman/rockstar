@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <assert.h>
-#include <sys/wait.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/errno.h>
+#include <sys/wait.h>
 #include "check_syscalls.h"
 #include "particle.h"
 #include "rockstar.h"
@@ -194,11 +195,11 @@ void clear_halo_rbuffer(struct recipient *r) {
 
 
 void add_sp_to_buffer(struct recipient *r, struct sphere_request *sp) {
-  struct sphere_request *buffer = r->buffer;
   assert(r->buffered >= 0);
   if (!(r->buffered%1000)) 
     r->buffer = check_realloc(r->buffer, sizeof(struct sphere_request)*
 			      (r->buffered+1000), "Sphere request buffer");
+  struct sphere_request *buffer = r->buffer;
   buffer[r->buffered] = *sp;
   r->buffered++;
 }
@@ -333,7 +334,7 @@ void send_bparticles(char *c_address, char *c_port) {
   }
   
   c = connect_to_addr(c_address, c_port);
-  send_to_socket_noconfirm(c, "rdne", 4);
+  send_to_socket(c, "rdne", 4);
   exit(0);
 }
 
@@ -375,7 +376,7 @@ void gather_spheres(char *c_address, char *c_port, float *bounds, int64_t id_off
   output_bgc2(id_offset, snap, chunk, bounds);
   
   c = connect_to_addr(c_address, c_port);
-  send_to_socket_noconfirm(c, "rdne", 4);
+  send_to_socket(c, "rdne", 4);
   exit(0);
 }
 
@@ -519,7 +520,7 @@ void send_halos(char *c_address, char *c_port, int64_t snap, int64_t chunk) {
   int64_t i,j, c;
   struct binary_output_header bheader;
 
-  load_binary_halos(snap, chunk, &bheader, &halos, &part_ids);
+  load_binary_halos(snap, chunk, &bheader, &halos, &part_ids, 0);
 
   for (j=0; j<num_recipients; j++)
     recipients[j].cs=connect_to_addr(recipients[j].address, recipients[j].port);
@@ -1171,8 +1172,8 @@ void client(int64_t type) {
   float bounds[6], halo_bounds[6], box_size;
   //struct recipient *r;
   int64_t c, s = -1, portnum, readers;
-  int stat_loc;
   int64_t num_nodes;
+  int stat_loc = 0;
 
   clear_merger_tree();
   if (FORK_READERS_FROM_WRITERS) {
@@ -1362,7 +1363,7 @@ void client(int64_t type) {
       if (!n) accept_workloads(hostname, port, snap, chunk);
       if (n<0) system_error("Couldn't fork halo analysis process!");
       id_offset = distribute_workloads(c, s, snap, chunk, bounds);
-      waitpid(n, &stat_loc, 0);
+      check_waitpid(n);
       if (in_error_state) network_error_cleanup();
       send_to_socket(c, "done", 4);
     }
@@ -1400,7 +1401,7 @@ void client(int64_t type) {
       if (!n) send_halos(hostname, port, snap, chunk);
       if (n<0) system_error("Couldn't fork merger tree process!");
       transfer_stuff(s,c,timestep);
-      waitpid(n, &stat_loc, 0);
+      check_waitpid(n);
       if (in_error_state) {
 	network_error_cleanup();
 	continue;
@@ -1422,7 +1423,7 @@ void client(int64_t type) {
       if (!n) send_bparticles(hostname, port);
       if (n<0) system_error("Couldn't fork boundary particle process!");
       transfer_stuff(s,c,0);
-      waitpid(n, &stat_loc, 0);
+      check_waitpid(n);
       if (in_error_state) {
 	network_error_cleanup();
 	continue;
@@ -1438,7 +1439,7 @@ void client(int64_t type) {
       if (!n) collect_bgroups(chunk);
       if (n<0) system_error("Couldn't fork boundary group process!");
       transfer_stuff(s,c,0);
-      waitpid(n, &stat_loc, 0);
+      check_waitpid(n);
       if (in_error_state) {
 	network_error_cleanup();
 	continue;
@@ -1459,7 +1460,7 @@ void client(int64_t type) {
       if (!n) gather_spheres(hostname, port, bounds, id_offset, snap, chunk);
       if (n<0) system_error("Couldn't fork boundary group process!");
       transfer_stuff(s,c,0);
-      waitpid(n, &stat_loc, 0);
+      check_waitpid(n);
       if (in_error_state) {
 	network_error_cleanup();
 	continue;
@@ -1498,6 +1499,20 @@ void client(int64_t type) {
       free_halos();
       particle_cleanup();
       clear_final_bg_data();
+    }
+
+    else if (!strcmp(cmd, "rpos")) {
+      assert(type == WRITER_TYPE);
+      snprintf(buffer, 1024, "%s %"PRId64" %"PRId64" %"PRId64" %"PRId64" '%s'",
+	      RUN_PARALLEL_ON_SUCCESS, snap, NUM_SNAPS, chunk, NUM_WRITERS,
+	      ROCKSTAR_CONFIG_FILENAME);
+      if (system(buffer) != 0) {
+	system_error("Running external parallel analysis process failed.");
+	send_to_socket(c, "fail", 4);
+	return;
+      }
+      wait(&stat_loc); //*Should* be ECHILD, but on Mac OS X is necessary...
+      send_to_socket(c, "done", 4);
     }
     
     else if (!strcmp(cmd, "quit")) {

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <inttypes.h>
+#include <string.h>
 #include <sys/resource.h>
 #include "config_vars.h"
 #include "check_syscalls.h"
@@ -45,7 +46,7 @@ void setup_config(void) {
 
 void do_config(char *filename) {
   struct configfile c = {0};
-  if (filename)
+  if (filename && strlen(filename))
     load_config(&c, filename);
 
 #define string(a,b) a = config_to_string(&c,#a,b)
@@ -60,6 +61,10 @@ void do_config(char *filename) {
   syntax_check(&c, "[Warning]");
   setup_config();
   free_config(c);
+  if (filename && strlen(filename)) {
+    free(ROCKSTAR_CONFIG_FILENAME);
+    ROCKSTAR_CONFIG_FILENAME = strdup(filename);
+  }
 }
 
 void output_config(char *filename) {

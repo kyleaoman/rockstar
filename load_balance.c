@@ -174,10 +174,8 @@ void decide_chunks_for_memory_balance() {
 
   sort_chunks();
   num_proj = 1 + (1 + chunks[1])*chunks[0];
-  pr = check_realloc(pr, sizeof(struct projection)*num_proj,
-		     "Allocating projections.");
-  divisions = check_realloc(divisions, sizeof(float)*(chunks[2]+1),
-			    "Allocating box divisions.");
+  check_realloc_s(pr, sizeof(struct projection), num_proj);
+  check_realloc_s(divisions, sizeof(float), (chunks[2]+1));
   for (i=0; i<num_proj; i++) pr[i].id = i;
   populate_bounds(0, NULL, pr[0].bounds, 0, BOX_SIZE);
 

@@ -33,6 +33,5 @@ void load_binary_header(int64_t snap, int64_t chunk,
 			struct binary_output_header *bheader);
 void load_binary_halos(int64_t snap, int64_t chunk, 
       struct binary_output_header *bheader, struct halo **halos,
-		       int64_t **part_ids);
-
+		       int64_t **part_ids, int64_t coalesced);
 #endif /* _IO_INTERNAL_H_ */

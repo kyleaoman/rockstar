@@ -116,6 +116,11 @@ int protocol_check(char *resp, char *expt) {
     server_error_state = 1;
     return 0;
   }
+  else if (!strcmp(resp, "fail")) {
+    fprintf(stderr, "[Error] Aborting because analysis process failed.\n");
+    shutdown_clients();
+    exit(1);
+  }
   else if (strcmp(resp, expt)) {
     fprintf(stderr, "[Error] Protocol: expected %s, got %s!\n", expt, resp);
     shutdown_clients();
@@ -161,6 +166,12 @@ void wait_for_done_signal() {
     protocol_check(cmd, "done");
   }
 }
+
+void command_writers_and_confirm(char *cmd) {
+  command_writers(cmd);
+  wait_for_done_signal();
+}
+
 
 
 void init_clients() {
@@ -305,9 +316,8 @@ void transfer_particles() {
 
 void transfer_bparticles() {
   transfer_data(DATA_BPARTICLES, 1.01*AVG_PARTICLE_SPACING*FOF_LINKING_LENGTH);
-  command_writers("xfrb");
   timed_output("Transferring boundary particles between writers...\n");
-  wait_for_done_signal();
+  command_writers_and_confirm("xfrb");
 }
 
 
@@ -338,8 +348,7 @@ void find_halos(int64_t snap) {
     wait_for_all_ready(NUM_READERS, num_clients);
 
     timed_output("Linking boundary particles...\n");
-    command_writers("lnkb");
-    wait_for_done_signal();
+    command_writers_and_confirm("lnkb");
     command_writers("done");
     wait_for_all_ready(NUM_READERS, num_clients);
 
@@ -354,8 +363,7 @@ void find_halos(int64_t snap) {
       for_writers(i) recv_from_socket(clients[i].cs, clients[i].halo_bounds,
 				      sizeof(float)*6);
       transfer_data(DATA_HPARTICLES, 0);
-      command_writers("bgc2");
-      wait_for_done_signal();
+      command_writers_and_confirm("bgc2");
       command_writers("done");
     }
     command_writers("free");
@@ -564,6 +572,10 @@ int server(void) {
     if (server_error_state) { reset_error(); reload_parts = 1; continue; }
 
     timed_output("[Success] Done with snapshot %"PRId64".\n", snap);
+    if (strlen(RUN_PARALLEL_ON_SUCCESS)) {
+      timed_output("Running external parallel analysis process for snapshot %"PRId64"...\n", snap);
+      command_writers_and_confirm("rpos");
+    }
 
     if (strlen(RUN_ON_SUCCESS)) {
       if (snapnames && snapnames[snap])
@@ -583,5 +595,6 @@ int server(void) {
   }
   while (wait(NULL)>=0);
   shutdown_clients();
+  timed_output("[Finished]\n");
   return 1;
 }

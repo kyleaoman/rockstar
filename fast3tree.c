@@ -121,7 +121,7 @@ struct fast3tree_results *fast3tree_results_init(void);
 #undef fast3tree_find_sphere
 #define fast3tree_find_sphere _F3TN(FAST3TREE_PREFIX,fast3tree_find_sphere)
 static inline void fast3tree_find_sphere(struct fast3tree *t,
-			   struct fast3tree_results *res, float c[3], float r);
+			   struct fast3tree_results *res, float c[FAST3TREE_DIM], float r);
 
 #undef fast3tree_find_sphere_skip
 #define fast3tree_find_sphere_skip _F3TN(FAST3TREE_PREFIX,fast3tree_find_sphere_skip)
@@ -131,7 +131,7 @@ inline void fast3tree_find_sphere_skip(struct fast3tree *t,
 #undef fast3tree_find_sphere_periodic
 #define fast3tree_find_sphere_periodic _F3TN(FAST3TREE_PREFIX,fast3tree_find_sphere_periodic)
 int fast3tree_find_sphere_periodic(struct fast3tree *t,
-			   struct fast3tree_results *res, float c[3], float r);
+			   struct fast3tree_results *res, float c[FAST3TREE_DIM], float r);
 
 #undef fast3tree_find_inside_of_box
 #define fast3tree_find_inside_of_box _F3TN(FAST3TREE_PREFIX,fast3tree_find_inside_of_box)
@@ -664,7 +664,7 @@ void _fast3tree_split_node(struct fast3tree *t, struct tree3_node *node) {
 
   node_index = node - t->root;
   if ((t->num_nodes+2) > t->allocated_nodes) {
-    t->allocated_nodes += 1000;
+    t->allocated_nodes = t->allocated_nodes*1.05 + 1000;
     t->root = _fast3tree_check_realloc(t->root, sizeof(struct tree3_node)*(t->allocated_nodes), "Tree nodes");
     node = t->root + node_index;
   }

@@ -620,7 +620,7 @@ void norm_sd(struct fof *f, float thresh) {
       corr[j][k]/=(double)f->num_p;
 
   calc_deviations(corr, &sig_x, &sig_v);
-  //if (f->num_p == num_copies) sig_x *= 0.1;
+  if (f->num_p == num_copies) sig_x *= INITIAL_METRIC_SCALING;
 
   if (!sig_x || !sig_v) return;
 

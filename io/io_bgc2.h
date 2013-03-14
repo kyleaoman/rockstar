@@ -9,7 +9,6 @@ extern int64_t num_bgc2_snaps;
 struct extended_particle {
   int64_t id, hid;
   float pos[6];
-  float r2;
 };
 
 struct sphere_request {

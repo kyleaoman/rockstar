@@ -16,7 +16,7 @@
 char **bgc2_snapnames = NULL;
 int64_t num_bgc2_snaps = 0;
 GROUP_DATA_RMPVMAX *gd = NULL;
-float *bgc_group_center;
+extern float *particle_r;
 
 extern double particle_thresh_dens[5];
 
@@ -71,28 +71,17 @@ void convert_to_extended_particles(struct extended_particle *ep) {
     for (j=0; j<halos[i].num_p; j++) ep[halos[i].p_start + j].hid = i;
 }
 
-float square_dist_from_center(struct extended_particle *a) {
+float square_dist_from_center(struct extended_particle *a, float *c) {
   float ds=0, dx=0;
   int64_t i;
   for (i=0; i<3; i++) {
-    dx = fabs(a->pos[i]-bgc_group_center[i]);
+    dx = fabs(a->pos[i]-c[i]);
     if (PERIODIC && (dx > (BOX_SIZE/2.0))) dx = BOX_SIZE-dx;
     ds += dx*dx;
   }
   return ds;
 }
 
-int sort_results_by_distance(const void *a, const void *b) {
-  struct extended_particle * const *c = a;
-  struct extended_particle * const *d = b;
-  if (c[0]->r2 < d[0]->r2) return -1;
-  if (c[0]->r2 > d[0]->r2) return 1;
-  if (c[0]->id < d[0]->id) return -1;
-  if (c[0]->id > d[0]->id) return 1;
-  if (c[0]->hid > d[0]->hid) return -1;
-  if (c[0]->hid < d[0]->hid) return 1;
-  return 0;
-}
 
 #define FAST3TREE_TYPE struct extended_particle
 #define FAST3TREE_PREFIX BGC2
@@ -103,6 +92,59 @@ struct extended_particle *ep = NULL, *ep2 = NULL;
 struct fast3tree *ep_tree, *ep_tree2=NULL;
 struct fast3tree_results *ep_res;
 float ep_old_minmax[6];
+
+inline void insertion_sort_extended_particles(int64_t min, int64_t max,
+                struct extended_particle **particles, float *radii) {
+  int64_t i, pos;
+  float r;
+  struct extended_particle *tmp_p;
+  for (i=min+1; i<max; i++) {
+    r = radii[i];
+    tmp_p = particles[i];
+    pos = i;
+    while ((pos > min) && ((r < radii[pos-1]) || 
+      ((r == radii[pos-1]) && (tmp_p->id < particles[pos-1]->id)))) {
+      radii[pos] = radii[pos-1];
+      particles[pos] = particles[pos-1];
+      pos--;
+    }
+    radii[pos] = r;
+    particles[pos] = tmp_p;
+  }
+}
+
+void sort_extended_particles(int64_t min, int64_t max,
+                struct extended_particle **particles, float *radii) {  
+  int64_t i, si;
+  float minpivot, maxpivot, pivot, tmp;
+  struct extended_particle *tmp_p;
+  if (max-min < 2) return;
+
+  maxpivot = minpivot = radii[min];
+  for (i=min+1; i<max; i++) {
+    if (radii[i] > maxpivot) maxpivot = radii[i];
+    if (radii[i] < minpivot) minpivot = radii[i];
+  }
+  if ((minpivot == maxpivot) || ((max-min) < 10)) {
+    insertion_sort_extended_particles(min, max, particles, radii);
+    return;
+  }
+  pivot = minpivot + (maxpivot-minpivot)/2.0;
+  if (pivot == maxpivot) pivot = minpivot;
+  si = max-1;
+#define SWAP(a,b) {tmp_p = particles[a]; particles[a] = particles[b]; \
+    particles[b] = tmp_p; tmp = radii[a];                       \
+    radii[a] = radii[b];  radii[b] = tmp;}
+  
+  for (i=min; i<si; i++)
+    if (radii[i] > pivot) { SWAP(i, si); si--; i--; }
+  if (i==si && radii[si]<=pivot) si++;
+#undef SWAP
+  sort_extended_particles(min, si, particles, radii);
+  sort_extended_particles(si, max, particles, radii);
+}
+
+
 
 void init_extended_particle_tree(void) {
   ep = check_realloc(p, sizeof(struct extended_particle)*(num_p+num_additional_p), "Allocating extended particle memory.");
@@ -198,10 +240,11 @@ void output_bgc2(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
     _fast3tree_find_sphere(ep_tree->root, ep_res, halos[i].pos,
 			   halos[i].r*BGC2_R);
 
-    bgc_group_center = halos[i].pos;
+    if (ep_res->num_points > hdr->max_npart)
+      check_realloc_s(particle_r, sizeof(float), ep_res->num_points);
     for(j=0; j<ep_res->num_points; j++)
-      ep_res->points[j]->r2 = square_dist_from_center(ep_res->points[j]);
-    qsort(ep_res->points, ep_res->num_points, sizeof(struct extended_particle *), sort_results_by_distance);
+      particle_r[j] = square_dist_from_center(ep_res->points[j], halos[i].pos);
+    sort_extended_particles(0, ep_res->num_points, ep_res->points, particle_r);
 
     //Get rid of duplicated points
     if (ep_res->num_points > 1) {
@@ -216,7 +259,7 @@ void output_bgc2(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
 	   
 
     for (j=ep_res->num_points-1; j>=0; j--) {
-      float r = sqrt(square_dist_from_center(ep_res->points[j]));
+      float r = sqrt(square_dist_from_center(ep_res->points[j], halos[i].pos));
       if (r < FORCE_RES) r = FORCE_RES;
       float cur_dens = ((double)(j+1)/(r*r*r));
       if (cur_dens > dens_thresh) break;
@@ -232,7 +275,6 @@ void output_bgc2(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
       memcpy(temp_p.pos, halos[i].pos, sizeof(float)*6);
       temp_p.id = -1-halos[i].id;
       temp_p.hid = halos[i].id;
-      temp_p.r2 = 0;
     }
 
     gd[id].id = id+id_offset;

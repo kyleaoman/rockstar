@@ -5,18 +5,31 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/errno.h>
 #include <unistd.h>
 #include <signal.h>
 #include "inthash.h"
 
-
 //#define DEBUG_IO
+
 
 void system_error(char *errmsg) {
   fprintf(stderr, "[Error] %s\n", errmsg);
   perror("[Error] Reason");
   exit(1);
 }
+
+pid_t check_waitpid(pid_t pid) {
+  int stat_loc;
+  pid_t res;
+  do {
+    res = waitpid(pid, &stat_loc, 0);
+  } while ((res < 0) && (errno == EINTR));
+
+  if (res < 0) system_error("Waiting for child process failed.");
+  return res;
+}
+
 
 FILE *check_fopen(char *filename, char *mode) {
   FILE *res = fopen(filename, mode);
@@ -51,6 +64,7 @@ FILE *check_popen(char *command, char *mode) {
 
 FILE *check_rw_socket(char *command, pid_t *pid) {
   int sockets[2], status;
+  pid_t wres;
   FILE *res;
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets)<0)
     system_error("Failed to create socket pair!");
@@ -66,7 +80,10 @@ FILE *check_rw_socket(char *command, pid_t *pid) {
   close(sockets[1]);
   res = fdopen(sockets[0], "r+");
   if (!res) system_error("Failed to convert socket to stream!");
-  if (waitpid(*pid, &status, WNOHANG)) {
+  do {
+    wres = waitpid(*pid, &status, WNOHANG);
+  } while ((wres < 0) && (errno == EINTR));
+  if (wres < 0) {
     fprintf(stderr, "[Error] Failed to start child process: %s\n", command);
     exit(1);
   }
@@ -89,7 +106,7 @@ void check_lseek(int fd, off_t offset, int whence) {
 void rw_socket_close(FILE *res, pid_t pid) {
   fclose(res);
   kill(pid, 9);
-  waitpid(pid, NULL, 0);
+  check_waitpid(pid);
 }
 
 void *check_realloc(void *ptr, size_t size, char *reason) {

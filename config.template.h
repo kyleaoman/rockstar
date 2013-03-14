@@ -37,6 +37,7 @@ integer(PARALLEL_IO_WRITER_PORT, 32001);
 string(PARALLEL_IO_SERVER_INTERFACE, "");
 integer(PARALLEL_IO_CATALOGS, 0);
 string(RUN_ON_SUCCESS, "");
+string(RUN_PARALLEL_ON_SUCCESS, "");
 string(LOAD_BALANCE_SCRIPT, "");
 
 string(INBASE, ".");
@@ -83,6 +84,7 @@ integer(GADGET_VARIANT, 0);
 
 real(FOF_FRACTION, 0.7);
 real(FOF_LINKING_LENGTH, 0.28);
+real(INITIAL_METRIC_SCALING, 1);
 real(INCLUDE_HOST_POTENTIAL_RATIO, 0.3);
 integer(TEMPORAL_HALO_FINDING, 1);
 integer(MIN_HALO_PARTICLES, 10);
@@ -95,5 +97,6 @@ real(BOX_SIZE, 250); //In Mpc/h
 integer(OUTPUT_LEVELS, 0);
 real3(DUMP_PARTICLES, "0 0 0");
 
+string(ROCKSTAR_CONFIG_FILENAME, "");
 real(AVG_PARTICLE_SPACING, 0); //Auto-generated
 integer(SINGLE_SNAP, 0);

@@ -342,7 +342,7 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
     h->r = cbrt((3.0/(4.0*M_PI))*part_mdelta/particle_thresh_dens[0])*1e3;
     rvir = cbrt((3.0/(4.0*M_PI))*np_vir/particle_rvir_dens)*1e3;
     mvir = np_vir*PARTICLE_MASS;
-    calc_scale_radius(h, h->m, h->r, h->vmax, h->rvmax, SCALE_NOW, po, dens_tot, bound);
+    calc_scale_radius(h, m, h->r, h->vmax, h->rvmax, SCALE_NOW, po, dens_tot, bound);
     for (j=0; j<3; j++) h->J[j] = PARTICLE_MASS*SCALE_NOW*L[j];
     h->energy = estimate_total_energy(dens_tot, &(h->kin_to_pot));
     Jh = PARTICLE_MASS*SCALE_NOW*sqrt(L[0]*L[0] + L[1]*L[1] + L[2]*L[2]);

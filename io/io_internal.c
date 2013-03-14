@@ -151,13 +151,14 @@ void load_binary_header(int64_t snap, int64_t chunk,
 
 void load_binary_halos(int64_t snap, int64_t chunk, 
       struct binary_output_header *bheader, struct halo **halos,
-		       int64_t **part_ids)
+		       int64_t **part_ids, int64_t coalesced)
 {
   char buffer[1024];
   FILE *input;
   int64_t i, j;
 
-  get_output_filename(buffer, 1024, snap, chunk, "bin");
+  if (!coalesced) get_output_filename(buffer, 1024, snap, chunk, "bin");
+  else get_output_filename(buffer, 1024, snap, chunk, "coalesced.bin");
   input = check_fopen(buffer, "rb");
   check_fread(bheader, sizeof(struct binary_output_header), 1, input);
   assert(bheader->magic == ROCKSTAR_MAGIC);
