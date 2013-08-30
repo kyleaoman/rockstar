@@ -19,6 +19,7 @@ void gadget2_detect_filetype(FILE *input, char *filename) {
   int32_t first_word;
   SWAP_ENDIANNESS=0;
   check_fread(&first_word, sizeof(int32_t), 1, input);
+  check_limited_funread(&first_word, sizeof(int32_t), 1);
   if ((first_word != 4) && (first_word != GADGET_HEADER_SIZE) &&
       (first_word != 8)) {
     SWAP_ENDIANNESS = 1;
@@ -31,7 +32,6 @@ void gadget2_detect_filetype(FILE *input, char *filename) {
     fprintf(stderr, "[Error] Unrecognized GADGET2 file type in %s!\n", filename);
     exit(1);
   }
-  rewind(input);
 }
 
 void gadget2_read_stride(FILE *input, int64_t p_start, int64_t nelems, int64_t stride, int64_t width, struct particle *p, int64_t offset, int64_t skip, int64_t skip2, char *filename)
@@ -49,7 +49,7 @@ void gadget2_read_stride(FILE *input, int64_t p_start, int64_t nelems, int64_t s
     else if (readsize == (uint32_t)((nelems+skip+skip2)*8))
       GADGET_ID_BYTES = width = 8;
     else {
-      fprintf(stderr, "[Error] Invalid particle ID block size in GADGET2 file!\n");
+      fprintf(stderr, "[Error] Invalid particle ID block size in file %s!\n", filename);
       exit(1);
     }
   }
@@ -61,14 +61,15 @@ void gadget2_read_stride(FILE *input, int64_t p_start, int64_t nelems, int64_t s
     else if (readsize == (uint32_t)(stride*(nelems+skip+skip2)*8))
       width = 8;
     else {
-      fprintf(stderr, "[Error] Invalid position/velocity block size in GADGET2 file!\n");
+      fprintf(stderr, "[Error] Invalid position/velocity block size in file %s!\n", filename);
       exit(1);
     }
   }
 
-  check_fseeko(input, (skip*width*stride), SEEK_CUR);
-  buffer = check_realloc(buffer, GADGET_BUFFER_SIZE*stride*width,
-			 "Allocating read buffer.");
+  check_realloc_s(buffer, GADGET_BUFFER_SIZE,stride*width);
+  check_fskip(input, (skip*width*stride), buffer, 
+	      GADGET_BUFFER_SIZE*stride*width);
+
   while (nelems > 0) {
     to_read = nelems;
     if (to_read > GADGET_BUFFER_SIZE) to_read = GADGET_BUFFER_SIZE;
@@ -93,8 +94,9 @@ void gadget2_read_stride(FILE *input, int64_t p_start, int64_t nelems, int64_t s
     p_start += n;
     nelems -= n;
   }
+  check_fskip(input, 4+(skip2*width*stride), buffer, 
+	      GADGET_BUFFER_SIZE*stride*width);
   free(buffer);
-  check_fseeko(input, 4+(skip2*width*stride), SEEK_CUR);
 }
 
 void gadget2_extract_header_info(struct gadget_header *header)
@@ -124,7 +126,12 @@ void gadget2_extract_header_info(struct gadget_header *header)
   BOX_SIZE = header->box_size*GADGET_LENGTH_CONVERSION;
   TOTAL_PARTICLES = (((int64_t)header->num_total_particles_hw[GHPT])<<32) +
     (int64_t)header->num_total_particles[GHPT];
-  
+  //According to Matt Becker, LGADGET uses the header fields in a different way:
+  if (!strncasecmp(FILE_FORMAT, "LGADGET", 7)) {
+    TOTAL_PARTICLES = (((int64_t)header->num_total_particles[GHPT+1])<<32) +
+      (int64_t)header->num_total_particles[GHPT];
+  }
+
   SCALE_NOW = header->scale_factor;
   if (header->particle_masses[GHPT] || !PARTICLE_MASS || RESCALE_PARTICLE_MASS) {
     if (!RESCALE_PARTICLE_MASS)
@@ -189,15 +196,15 @@ void load_particles_gadget2(char *filename, struct particle **p, int64_t *num_p)
 
   gadget_variant_block("POS");
   gadget2_read_stride(input, *num_p, halo_particles, 3, sizeof(float), 
-	 *p, (char *)&(p[0][0].pos[0])-(char*)(p[0]), skip, skip2, filename);
+    *p, (char *)&(p[0][0].pos[0])-(char*)(p[0]), skip, skip2, filename);
 
   gadget_variant_block("VEL");
   gadget2_read_stride(input, *num_p, halo_particles, 3, sizeof(float), 
-	 *p, (char *)&(p[0][0].pos[3])-(char*)(p[0]), skip, skip2, filename);
+    *p, (char *)&(p[0][0].pos[3])-(char*)(p[0]), skip, skip2, filename);
 
   gadget_variant_block("ID");
   gadget2_read_stride(input, *num_p, halo_particles, 1, GADGET_ID_BYTES, 
-	 *p, (char *)&(p[0][0].id)-(char*)(p[0]), skip, skip2, filename);
+    *p, (char *)&(p[0][0].id)-(char*)(p[0]), skip, skip2, filename);
 
   gadget2_rescale_particles(*p, *num_p, halo_particles);
 

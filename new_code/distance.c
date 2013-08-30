@@ -3,9 +3,11 @@
 #include "config_vars.h"
 #include "hubble.h"
 
-#define MAX_Z 300.0
+#define MAX_Z 100.0
 #define Z_BINS 1000.0
 #define TOTAL_BINS (((int)MAX_Z)*((int)Z_BINS))
+//#define Omega_M Om
+//#define Omega_L Ol
 #define h h0
 double Dh;
 double _Dc[TOTAL_BINS];
@@ -20,7 +22,11 @@ double _Dc[TOTAL_BINS];
 #define M_PI        3.14159265358979323846264338327950288   /* From math.h */
 #endif /* M_PI */
 
-#define _E(z) (hubble_scaling(z))
+//double _E (double z) {
+//  double z1 = 1.0+z;
+//  return sqrt(Omega_M * (z1*z1*z1) + Omega_L);
+//}
+#define _E(z) (hubble_noscale(z))
 
 void init_cosmology(void)
 {
@@ -95,3 +101,21 @@ double comoving_distance_h_to_redshift(double r) {
   return (comoving_distance_to_redshift(r/h));
 }
 
+/*
+#include <stdlib.h>
+#include <stdio.h>
+int main(void) {
+  int64_t i;
+  
+  Om = 0.7;
+  Ol = 0.3;
+  W0 = -0.8;
+  WA = 0.2;
+  init_cosmology();
+  int NT = 50;
+  for (i=0; i<NT; i++) {
+    double a = 1.0/(1.0 + (1.0*i)*MAX_Z/NT/20);
+    printf("%f %f \n", a, comoving_distance_h(1.0/a-1.0));
+  }
+}
+*/

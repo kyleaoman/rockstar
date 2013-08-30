@@ -156,9 +156,10 @@ void build_bgroup_links(void) {
   float r = AVG_PARTICLE_SPACING * FOF_LINKING_LENGTH;
   if (PERIODIC) _fast3tree_set_minmax(bp_tree, 0, BOX_SIZE);
   for (i=0; i<(num_bp-num_new_bp); i++) {
+    int64_t gid1 = find_bgroup(bp+i);
     if (!PERIODIC) fast3tree_find_sphere(bp_tree, bp_res, bp[i].pos, r);
     else fast3tree_find_sphere_periodic(bp_tree, bp_res, bp[i].pos, r);
-    int64_t gid1 = find_bgroup(bp+i);
+
     for (j=0; j<bp_res->num_points; j++) {
       int64_t gid2 = find_bgroup(bp_res->points[j]);
       assert(gid1 > -1 && gid2 > -1);

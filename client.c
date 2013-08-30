@@ -117,6 +117,23 @@ void calc_particle_bounds(float *bounds) {
   }
 }
 
+void calc_particle_bounds_periodic(float *bounds) {
+  int64_t i,j;
+  for (j=0; j<6; j++) bounds[j]=0;
+  if (!num_p) return;
+  memcpy(bounds, p[0].pos, sizeof(float)*3);
+  memcpy(bounds+3, p[0].pos, sizeof(float)*3);
+  for (i=1; i<num_p; i++) {
+    for (j=0; j<3; j++) {
+      float pos = p[i].pos[j];
+      if (p[0].pos[j]-pos > BOX_SIZE/2.0) pos+=BOX_SIZE;
+      else if (p[0].pos[j]-pos < -BOX_SIZE/2.0) pos-=BOX_SIZE;
+      if (bounds[j] > pos) bounds[j] = pos;
+      if (bounds[j+3] < pos) bounds[j+3] = pos;
+    }
+  }
+}
+
 void calc_halo_bounds(float *bounds) {
   int64_t i,j;
   for (j=0; j<6; j++) bounds[j]=0;
@@ -124,11 +141,11 @@ void calc_halo_bounds(float *bounds) {
   memcpy(bounds, halos[0].pos, sizeof(float)*3);
   memcpy(bounds+3, halos[0].pos, sizeof(float)*3);
   for (i=0; i<num_halos; i++) {
+    float r = BGC2_R*halos[i].r;
+    if (STRICT_SO_MASSES) r = BGC2_R*max_halo_radius(halos+i);
     for (j=0; j<3; j++) {
-      if (bounds[j] > halos[i].pos[j]-BGC2_R*halos[i].r) 
-	bounds[j] = halos[i].pos[j]-BGC2_R*halos[i].r;
-      if (bounds[j+3] < halos[i].pos[j]+BGC2_R*halos[i].r) 
-	bounds[j+3] = halos[i].pos[j]+BGC2_R*halos[i].r;
+      if (bounds[j] > halos[i].pos[j]-r) bounds[j] = halos[i].pos[j]-r;
+      if (bounds[j+3] < halos[i].pos[j]+r) bounds[j+3] = halos[i].pos[j]+r;
     }
   }
 }
@@ -250,6 +267,7 @@ void check_bgc2_bounds(struct halo *h1, struct recipient *r) {
   float bounds[6];
   int64_t i;
   sp.r = h1->r * BGC2_R;
+  if (STRICT_SO_MASSES) sp.r = BGC2_R * max_halo_radius(h1);
   for (i=0; i<3; i++) {
     bounds[i] = r->bounds[i]-sp.r;
     bounds[i+3] = r->bounds[i+3]+sp.r;
@@ -271,6 +289,8 @@ void send_config(int64_t c) {
   snd(Ol);
   snd(Om);
   snd(h0);
+  snd(TRIM_OVERLAP);
+  snd(ROUND_AFTER_TRIM);
 #undef snd
 }
 
@@ -284,6 +304,8 @@ void recv_config(int64_t c) {
   rcv(Ol);
   rcv(Om);
   rcv(h0);
+  rcv(TRIM_OVERLAP);
+  rcv(ROUND_AFTER_TRIM);
 #undef rcv
  if (strlen(LIGHTCONE_ALT_SNAPS)) {
    for (i=0; i<3; i++)
@@ -343,9 +365,11 @@ void gather_spheres(char *c_address, char *c_port, float *bounds, int64_t id_off
 
   for (i=0; i<num_halos; i++) {
     if (!_should_print(halos+i, bounds)) continue;
+    float r = BGC2_R*halos[i].r;
+    if (STRICT_SO_MASSES) r = BGC2_R*max_halo_radius(halos+i);
     for (j=0; j<3; j++) {
-      if (halos[i].pos[j]-BGC2_R*halos[i].r < bounds[j]) break;
-      if (halos[i].pos[j]+BGC2_R*halos[i].r > bounds[j+3]) break;
+      if (halos[i].pos[j]-r < bounds[j]) break;
+      if (halos[i].pos[j]+r > bounds[j+3]) break;
     }
     if (j==3) continue;
     for (j=0; j<num_recipients; j++) {
@@ -369,13 +393,15 @@ void gather_spheres(char *c_address, char *c_port, float *bounds, int64_t id_off
       recv_from_socket(c, ep2+num_ep2, sizeof(struct extended_particle)*k);
       num_ep2+=k;
     }
-    send_to_socket(c, "done", 4);
+    send_to_socket_noconfirm(c, "done", 4);
     close_rsocket(c);
   }
 
   output_bgc2(id_offset, snap, chunk, bounds);
   
   c = connect_to_addr(c_address, c_port);
+  //  send_to_socket_noconfirm(c, "mass", 4);
+  //send_to_socket(c, halos, sizeof(struct halo)*num_halos);
   send_to_socket(c, "rdne", 4);
   exit(0);
 }
@@ -857,8 +883,10 @@ void accept_workloads(char *c_address, char *c_port, int64_t snap, int64_t chunk
 	  }
 	  close_rsocket(m2);
 	}
-	if (memcmp(w.bounds, zero_bounds, sizeof(float)*6)!=0)
-	  calc_particle_bounds(w.bounds);
+	if (memcmp(w.bounds, zero_bounds, sizeof(float)*6)!=0) {
+	  if (!PERIODIC || !BOX_SIZE) calc_particle_bounds(w.bounds);
+	  else calc_particle_bounds_periodic(w.bounds);
+	}
 	new_bounds = 1;
 	assert(!dup_ids);
       }

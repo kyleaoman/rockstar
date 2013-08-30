@@ -11,6 +11,7 @@ string(MASS_DEFINITION2, "200b");
 string(MASS_DEFINITION3, "200c");
 string(MASS_DEFINITION4, "500c");
 string(MASS_DEFINITION5, "2500c");
+integer(STRICT_SO_MASSES, 0);
 integer(MIN_HALO_OUTPUT_SIZE, 20);
 real(FORCE_RES, 0.003); //In Mpc/h
 real(FORCE_RES_PHYS_MAX, 0);
@@ -19,6 +20,8 @@ real(SCALE_NOW, 1.0);
 real(h0, 0.7);
 real(Ol, 0.73);
 real(Om, 0.27);
+real(W0, -1);
+real(WA, 0);
 
 integer(GADGET_ID_BYTES, 4);
 real(GADGET_MASS_CONVERSION, 1e10);
@@ -81,6 +84,7 @@ real(LIMIT_RADIUS, 0);
 
 integer(SWAP_ENDIANNESS, 0);
 integer(GADGET_VARIANT, 0);
+integer(ART_VARIANT, 0);
 
 real(FOF_FRACTION, 0.7);
 real(FOF_LINKING_LENGTH, 0.28);

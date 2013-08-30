@@ -607,7 +607,8 @@ static inline int64_t _fast3tree_find_largest_dim(float * min, float * max) {
 
 #undef _fast3tree_sort_dim_pos
 #define _fast3tree_sort_dim_pos _F3TN(FAST3TREE_PREFIX,_fast3tree_sort_dim_pos)
-static inline int64_t _fast3tree_sort_dim_pos(struct tree3_node * node) {
+static inline int64_t _fast3tree_sort_dim_pos(struct tree3_node * node,
+					      float balance) {
   int64_t dim = node->div_dim = 
     _fast3tree_find_largest_dim(node->min, node->max);
   FAST3TREE_TYPE *p = node->points;
@@ -655,7 +656,7 @@ void _fast3tree_split_node(struct fast3tree *t, struct tree3_node *node) {
   struct tree3_node *left, *right;
   int64_t left_index, node_index;
 
-  num_left = _fast3tree_sort_dim_pos(node);
+  num_left = _fast3tree_sort_dim_pos(node, 1.0);
   if (num_left == node->num_points || num_left == 0) 
   { //In case all node points are at same spot
     node->div_dim = -1;
@@ -791,6 +792,38 @@ void _fast3tree_set_minmax(struct fast3tree *t, float min, float max) {
   }
 }
 
+
+#undef _fast3tree_find_next_closest_dist
+#define _fast3tree_find_next_closest_dist _F3TN(FAST3TREE_PREFIX,_fast3tree_find_next_closest_dist)
+float _fast3tree_find_next_closest_dist(const struct tree3_node *n, const float c[FAST3TREE_DIM], float r, const struct tree3_node *o_n, int64_t *counts) {
+  int64_t i,j;
+  float r2, dist, dx, *pos;
+
+  if (_fast3tree_box_not_intersect_sphere(n,c,r) || (o_n==n)) return r;
+  if (n->div_dim < 0) { /* Leaf node */
+    r2 = r*r;
+    for (i=0; i<n->num_points; i++) {
+      j = dist = 0;
+      pos = n->points[i].pos;
+      for (; j<FAST3TREE_DIM; j++) {
+	dx = c[j]-pos[j];
+	dist += dx*dx;
+      }
+      if (dist < r2) r2 = dist;
+    }
+    *counts = (*counts)+1;
+    return sqrt(r2);
+  }
+  struct tree3_node *n1=n->left, *n2=n->right;
+  if (c[n->div_dim] > 0.5*(n->min[n->div_dim]+n->max[n->div_dim])) {
+    n1 = n->right;
+    n2 = n->left;
+  }
+  r = _fast3tree_find_next_closest_dist(n1, c, r, o_n, counts);
+  return _fast3tree_find_next_closest_dist(n2, c, r, o_n, counts);
+}
+
+
 #undef fast3tree_find_next_closest_distance
 #define fast3tree_find_next_closest_distance _F3TN(FAST3TREE_PREFIX,fast3tree_find_next_closest_distance)
 float fast3tree_find_next_closest_distance(struct fast3tree *t, struct fast3tree_results *res, float c[FAST3TREE_DIM]) {
@@ -806,24 +839,23 @@ float fast3tree_find_next_closest_distance(struct fast3tree *t, struct fast3tree
   while (nd != t->root && (nd->min[nd->parent->div_dim] == nd->max[nd->parent->div_dim])) nd = nd->parent;
 
   min_dist = 0;
+  for (j=0; j<FAST3TREE_DIM; j++) {
+    dx = nd->max[j]-nd->min[j];
+    min_dist += dx*dx;
+  }
+
   for (i=0; i<nd->num_points; i++) {
     dist = 0;
     for (j=0; j<FAST3TREE_DIM; j++) {
       dx = c[j] - nd->points[i].pos[j];
       dist += dx*dx;
     }
-    if (!min_dist || (dist && dist < min_dist)) min_dist = dist;
+    if (dist && (dist < min_dist)) min_dist = dist;
   }
-  min_dist = sqrt(min_dist);
-
-  fast3tree_find_sphere(t, res, c, min_dist*1.01);
-  for (i=0; i<res->num_points; i++) {
-    dist = 0;
-    for (j=0; j<FAST3TREE_DIM; j++) { dx = res->points[i]->pos[j] - c[j]; dist += dx*dx; }
-    if ((dist && dist < min_dist)) min_dist = dist;
-  }
-  //if (!min_dist) fprintf(stderr, "Huh???\n");
-  return sqrt(min_dist);
+  int64_t counts = 0;
+  min_dist = _fast3tree_find_next_closest_dist(t->root,c,sqrt(min_dist), nd, &counts);
+  //printf("%"PRId64"\n", counts);
+  return min_dist;
 }
 
 #undef float

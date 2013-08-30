@@ -2,8 +2,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <assert.h>
-#include "universal_constants.h"
-#include "config_vars.h"
+#include "../universal_constants.h"
+#include "../config_vars.h"
 #include "universe_time.h"
 #include "hubble.h"
 #include "integrate.h"
