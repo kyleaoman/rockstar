@@ -53,6 +53,7 @@ sub parsetoc {
 	my ($num, $title, $ref) = /\{([\d.]+)\}([^\}]+)\}\{\d+\}\{(\w+[\d.]+)\}/;
 	my $mdref = "\L$title\E";
 	$mdref =~ tr/ /-/;
+	$mdref =~ tr!(/)!!d;
 	$mdref = "markdown-header-".$mdref;
 	$mdref{$ref} = $mdref;
 	if (!($num =~ s/\d+\.//)) {
@@ -76,7 +77,7 @@ sub latex {
     if ($c eq "begin") {
 	return "" if ($a eq "document" or $a eq "itemize");
 	if ($a eq "verbatim") { $verbatim = 1; return ""; }
-	if ($a eq "figure") { $infigure=1; $fig++; return "<p id=\"fig.$fig\" />"; }
+	if ($a eq "figure") { $infigure=1; $fig++; return ""; }
     }
     if ($c eq "end") {
 	return "" if ($a eq "document" or $a eq "itemize");
@@ -111,13 +112,13 @@ sub latex {
     }
     if ($c eq "ref") {
 	if ($refs{$a} and $mdref{$refs{$a}}) {
-	    my $name = $mdref{$refs{$a}};
+	    my $name = $refs{$a};
 	    $name =~ s/^\w+\.//;
 	    return "[$name](#$mdref{$refs{$a}})";
 	}
 	else { return "??"; }
     }
-    return '&copy;' if ($c eq "textcopyright");
+    return '(C)' if ($c eq "textcopyright");
     return "<$a>" if ($c eq "url");
     if ($c eq 'ttt' or $c eq 'texttt') {
 	$a =~ s/\\_/_/g;
