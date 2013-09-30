@@ -61,11 +61,11 @@ sub parsetoc {
 	    print "* $num. [$title](#$mdref)\n";
 	}
 	elsif (!($num =~ /\d+\.\d+\./)) {
-	    print " "x4,"$num. [$title](#$mdref)\n";
+	    print " "x4,"* $num. [$title](#$mdref)\n";
 	}
 	else {
 	    #$num =~ s/\d+\.//;
-	    print " "x8,"$num. [$title](#$mdref)\n";
+	    print " "x8,"* $num. [$title](#$mdref)\n";
 	}
     }
     close INPUT;
@@ -96,11 +96,11 @@ sub latex {
     if ($c eq "subsection") {
 	$subsec++;
 	$subsubsec = 0;
-	return "$subsec. ### $a ###\n";
+	return "+ $sec.$subsec. ### $a ###\n";
     }
     if ($c eq "subsubsection") {
 	$subsubsec++;
-	return "$subsubsec. #### $a ####\n";
+	return "+ $sec.$subsec.$subsubsec. #### $a ####\n";
     }
     if ($c eq "label") { 
 	if ($infigure) { $labels{$a} = "fig.$fig"; }
