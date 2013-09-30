@@ -23,7 +23,7 @@
    non-Unix environments.  (Mac OS X is fine; Windows is not).
 
 \section{Running}
-   \subsection {Quick start (single snapshot, single CPU)}
+   \subsection{Quick start (single snapshot, single CPU)}
       Several example configuration files have been provided.  If you have a
       small simulation file and you'd like to run Rockstar on a single processor
       to test its output, edit the file ``\texttt{quickstart.cfg}'' and change the file
@@ -58,7 +58,7 @@
       ./rockstar -c quickstart.cfg <particle file>
 \end{verbatim}      
       Note that periodic boundary conditions are \textbf{not} assumed for a single-cpu
-      run.  (For that, see the next section, \ref{s:parallel_io}).
+      run.  (For that, see the next section, \S \ref{s:parallel_io}).
 
 \begin{figure}
 \vspace{-11ex}
@@ -90,8 +90,7 @@
       to use.
 
       By default, the number of reading tasks is set to the number
-      of files being read for each simulation snapshot:\footnote{If the number of blocks is more than the number of CPUs you wish to use, then you should also specify:
-      	 \texttt{NUM\_READERS = $<$number of CPUs$>$}}
+      of files being read for each simulation snapshot:\footnote{If the number of blocks is more than the number of CPUs you wish to use, then you should also specify: \texttt{NUM\_READERS = $<$number of CPUs$>$}}
 \begin{verbatim}
          NUM_BLOCKS = <number of files per snapshot>
 \end{verbatim}
@@ -181,11 +180,11 @@
       snapshot.
 
 \subsection{Inline Analysis for Simulations}
-      For very large simulations, it is possible to have Rockstar run on particle snapshots as they become available.  If writing the snapshots to disk is not an option, Rockstar can also accept particle input from pipes (see \S\ref{s:input_formats}).  It is strongly recommended that you contact the authors for assistance before running an important simulation this way.
+      For very large simulations, it is possible to have Rockstar run on particle snapshots as they become available.  If writing the snapshots to disk is not an option, Rockstar can also accept particle input from pipes (see \S \ref{s:input_formats}).  It is strongly recommended that you contact the authors for assistance before running an important simulation this way.
 
 \subsection{Output}
 \label{s:output}
-Rockstar can output in many different formats (see \S\ref{s:output_formats} below).  If run in single-processor mode, halos are saved to a file called \texttt{halos\_0.0.ascii} with one line per halo.  If run in multi-processor mode, halos are saved to files called \texttt{out\_0.list}, \texttt{out\_1.list}, etc., with one file per particle snapshot.  Many halo properties are currently calculated by default:
+Rockstar can output in many different formats (see \S \ref{s:output_formats} below).  If run in single-processor mode, halos are saved to a file called \texttt{halos\_0.0.ascii} with one line per halo.  If run in multi-processor mode, halos are saved to files called \texttt{out\_0.list}, \texttt{out\_1.list}, etc., with one file per particle snapshot.  Many halo properties are currently calculated by default:
 \begin{itemize}
 \item Halo masses at several radii: $M_\mathrm{vir}$, $M_{200b}$, $M_{200c}$, $M_{500c}$, $M_{2500c}$.  These masses always include any contributions from substructure.  Also, masses with higher density thresholds (e.g., 2500c) can sometimes be zero if the density of the halo never rises above the threshold.\footnote{Particles are assumed to have an effective radius of \texttt{FORCE\_RES} for the purposes of density calculations near the halo center.}  By default, only bound particles are included; see \S \ref{s:common_options} if this is not what you want.
 \item Halo maximum circular velocity and velocity dispersion.
