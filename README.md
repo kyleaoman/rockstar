@@ -13,30 +13,30 @@ License: GNU GPLv3
 Science/Documentation Paper: <http://arxiv.org/abs/1110.4372>
 
 ## Contents
-* [Compiling](section.1)
-* [Running](section.2)
-    1. [Quick start (single snapshot, single CPU)](subsection.2.1)
-    2. [More Complete Setup (multiple snapshots/input files/CPUs)](subsection.2.2)
-    3. [Inline Analysis for Simulations](subsection.2.3)
-    4. [Output](subsection.2.4)
-    5. [Merger Trees](subsection.2.5)
-    6. [Host / Subhalo Relationships](subsection.2.6)
-    7. [Lightcones](subsection.2.7)
-    8. [Controlling Output Formats](subsection.2.8)
-    9. [Infiniband / Network Connectivity Notes](subsection.2.9)
-    10. [Full Configuration Options](subsection.2.10)
-        1. [Commonly-Used Options](subsubsection.2.10.1)
-        2. [Rarely-used Options](subsubsection.2.10.2)
-    11. [Full Example Scripts](subsection.2.11)
-* [Extending Rockstar](section.3)
-    1. [Adding More Configuration Parameters](subsection.3.1)
-    2. [Adding More Input Formats](subsection.3.2)
-    3. [Adding More Output Formats](subsection.3.3)
-    4. [Adding More Halo Properties](subsection.3.4)
+* [Compiling](#markdown-header-compiling)
+* [Running](#markdown-header-running)
+    1. [Quick start (single snapshot, single CPU)](#markdown-header-quick-start-(single-snapshot,-single-cpu))
+    2. [More Complete Setup (multiple snapshots/input files/CPUs)](#markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus))
+    3. [Inline Analysis for Simulations](#markdown-header-inline-analysis-for-simulations)
+    4. [Output](#markdown-header-output)
+    5. [Merger Trees](#markdown-header-merger-trees)
+    6. [Host / Subhalo Relationships](#markdown-header-host-/-subhalo-relationships)
+    7. [Lightcones](#markdown-header-lightcones)
+    8. [Controlling Output Formats](#markdown-header-controlling-output-formats)
+    9. [Infiniband / Network Connectivity Notes](#markdown-header-infiniband-/-network-connectivity-notes)
+    10. [Full Configuration Options](#markdown-header-full-configuration-options)
+        1. [Commonly-Used Options](#markdown-header-commonly-used-options)
+        2. [Rarely-used Options](#markdown-header-rarely-used-options)
+    11. [Full Example Scripts](#markdown-header-full-example-scripts)
+* [Extending Rockstar](#markdown-header-extending-rockstar)
+    1. [Adding More Configuration Parameters](#markdown-header-adding-more-configuration-parameters)
+    2. [Adding More Input Formats](#markdown-header-adding-more-input-formats)
+    3. [Adding More Output Formats](#markdown-header-adding-more-output-formats)
+    4. [Adding More Halo Properties](#markdown-header-adding-more-halo-properties)
 
 
 
-<h2 id="section.1">Compiling</h2>
+## Compiling ##
 
 If you use the GNU C compiler version 4.0 or above on a 64-bit machine,
 compiling should be as simple as typing "`make`" at the command prompt.
@@ -45,9 +45,9 @@ Rockstar does not support compiling on 32-bit machines and has not been
 tested with other compilers.  Additionally, Rockstar does not support
 non-Unix environments.  (Mac OS X is fine; Windows is not).
 
-<h2 id="section.2">Running</h2>
+## Running ##
 
-1. <h3 id="section.2.1">Quick start (single snapshot, single CPU)</h3>
+    1. ### Quick start (single snapshot, single CPU) ###
 
     Several example configuration files have been provided.  If you have a
     small simulation file and you'd like to run Rockstar on a single processor
@@ -83,16 +83,16 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         ./rockstar -c quickstart.cfg <particle file>
     
     Note that periodic boundary conditions are *not* assumed for a single-cpu
-    run.  (For that, see the next section, Section  [2.2](subsection.2.2)).
+    run.  (For that, see the next section, Section  [markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus)](#markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus))).
     
     <p id="fig.1" />
     
-    ![](http://slac.stanford.edu/~behroozi/Rockstar/rockstar_layout.png)
-    Figure 1. *Logical Layout of Parallel Processing*: One master process controls multiple reader and writer (worker) processes.  The reader processes are responsible for loading data and rearranging it into rectangular volumes according to the number of writers.  The writer processes receive data from the readers, analyze it for halos, and write output catalogs to one or more files.  *Physical Layout*: Every CPU should contain one writer process, since this is where the bulk of the analysis time is spent.  The master process consumes very little CPU power, and so can easily be accommodated by the first CPU.  The reader processes also consume very little CPU power; however, they require enough memory to load in all the particle data.  For this reason, they should be distributed evenly across all the nodes.  Rockstar has several configuration parameters to help with launching the right number and the right type of tasks per node; see Section  [2.2](subsection.2.2).
+    ![rockstar_layout](http://slac.stanford.edu/~behroozi/Rockstar/rockstar_layout.png "rockstar_layout")
+    Figure 1. *Logical Layout of Parallel Processing*: One master process controls multiple reader and writer (worker) processes.  The reader processes are responsible for loading data and rearranging it into rectangular volumes according to the number of writers.  The writer processes receive data from the readers, analyze it for halos, and write output catalogs to one or more files.  *Physical Layout*: Every CPU should contain one writer process, since this is where the bulk of the analysis time is spent.  The master process consumes very little CPU power, and so can easily be accommodated by the first CPU.  The reader processes also consume very little CPU power; however, they require enough memory to load in all the particle data.  For this reason, they should be distributed evenly across all the nodes.  Rockstar has several configuration parameters to help with launching the right number and the right type of tasks per node; see Section  [markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus)](#markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus)).
     
     
     
-2. <h3 id="section.2.2">More Complete Setup (multiple snapshots/input files/CPUs)</h3>
+    2. ### More Complete Setup (multiple snapshots/input files/CPUs) ###
 
     
     Note: Rockstar does _not_ use MPI for its parallelization.  As such,
@@ -102,7 +102,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     For running on multiple snapshots or simulations with multiple input
     files per snapshot, Rockstar uses a master process to direct the
     order of processing steps and several client processes to do the
-    actual work (see Fig.\ [1](fig.1)).
+    actual work (see Fig.\ ??).
     
     For historical reasons, enabling Rockstar to run on multiple input files,
     multiple snapshots, or multiple CPUs is controlled by setting the following "Parallel
@@ -172,7 +172,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     data output directory (`OUTBASE`) with contact information.
     
     You will then have to start `NUM_READERS` (usually, `NUM_BLOCKS`)
-    reader tasks and `NUM_WRITERS` writer tasks (refer to Fig.\ [1](fig.1) for task CPU assignment).  To simplify this process,
+    reader tasks and `NUM_WRITERS` writer tasks (refer to Fig.\ ?? for task CPU assignment).  To simplify this process,
     there are two additional options you can set:
         
         FORK_READERS_FROM_WRITERS = 1
@@ -189,7 +189,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         
         /path/to/rockstar -c OUTBASE/auto-rockstar.cfg
     
-    As noted above, `OUTBASE` is the current working directory by default; however, if you change it in the config file, the `auto-rockstar.cfg` file will be written to that location as well.  Rockstar does not come with a command to start itself on many machines at the same time; however, the utilities which come with various MPI installations (e.g., `mpirun/mpiexec/ibrun`) are often suitable for doing so.  See Section  [2.11](subsection.2.11) for info about example startup scripts.
+    As noted above, `OUTBASE` is the current working directory by default; however, if you change it in the config file, the `auto-rockstar.cfg` file will be written to that location as well.  Rockstar does not come with a command to start itself on many machines at the same time; however, the utilities which come with various MPI installations (e.g., `mpirun/mpiexec/ibrun`) are often suitable for doing so.  See Section  [markdown-header-full-example-scripts](#markdown-header-full-example-scripts) for info about example startup scripts.
     
     In terms of memory usage, Rockstar will use about 60 bytes / particle
     _maximum total_ for a cosmological simulation.  Thus, if you have a
@@ -205,14 +205,14 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     as you would normally.  Rockstar will resume analysis from the last incomplete
     snapshot.
     
-3. <h3 id="section.2.3">Inline Analysis for Simulations</h3>
+    3. ### Inline Analysis for Simulations ###
 
-    For very large simulations, it is possible to have Rockstar run on particle snapshots as they become available.  If writing the snapshots to disk is not an option, Rockstar can also accept particle input from pipes (see Section  [3.2](subsection.3.2)).  It is strongly recommended that you contact the authors for assistance before running an important simulation this way.
+    For very large simulations, it is possible to have Rockstar run on particle snapshots as they become available.  If writing the snapshots to disk is not an option, Rockstar can also accept particle input from pipes (see Section  [markdown-header-adding-more-input-formats](#markdown-header-adding-more-input-formats)).  It is strongly recommended that you contact the authors for assistance before running an important simulation this way.
     
-4. <h3 id="section.2.4">Output</h3>
+    4. ### Output ###
 
     
-    Rockstar can output in many different formats (see Section  [2.8](subsection.2.8) below).  If run in single-processor mode, halos are saved to a file called `halos_0.0.ascii` with one line per halo.  If run in multi-processor mode, halos are saved to files called `out_0.list`, `out_1.list`, etc., with one file per particle snapshot.  Many halo properties are currently calculated by default:
+    Rockstar can output in many different formats (see Section  [markdown-header-controlling-output-formats](#markdown-header-controlling-output-formats) below).  If run in single-processor mode, halos are saved to a file called `halos_0.0.ascii` with one line per halo.  If run in multi-processor mode, halos are saved to files called `out_0.list`, `out_1.list`, etc., with one file per particle snapshot.  Many halo properties are currently calculated by default:
     
     +  Halo masses at several radii: Mvir, M200b, M200c, M500c, M2500c.  These masses always include any contributions from substructure.  Also, masses with higher density thresholds (e.g., 2500c) can sometimes be zero if the density of the halo never rises above the threshold. [Footnote: Particles are assumed to have an effective radius of `FORCE_RES` for the purposes of density calculations near the halo center.}  By default, only bound particles are included; see Section  \ref{s:common_options] if this is not what you want.
     +  Halo maximum circular velocity and velocity dispersion.
@@ -223,9 +223,9 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     +  The ratio of halo kinetic to potential energy, and the center position and velocity offsets from the halo's bulk average position and velocity.
     
     
-    Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see Section  [3.4](subsection.3.4).
+    Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see Section  [markdown-header-adding-more-halo-properties](#markdown-header-adding-more-halo-properties).
     
-5. <h3 id="section.2.5">Merger Trees</h3>
+    5. ### Merger Trees ###
 
     
     By default, the output files for Rockstar include some basic descendant
@@ -241,11 +241,11 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     Consistent Trees README file for use).  It is _very_ important to use the
     same version of this script as the Rockstar version that you used for analysis.
     
-6. <h3 id="section.2.6">Host / Subhalo Relationships</h3>
+    6. ### Host / Subhalo Relationships ###
 
     By default, the output files for Rockstar do not include information
     about which halos are hosts (as opposed to subhalos).  This is because
-    the consistent tree code (see Section  [2.5](subsection.2.5), above) automatically
+    the consistent tree code (see Section  [markdown-header-merger-trees](#markdown-header-merger-trees), above) automatically
     calculates such relationships.  However, if you do not intend to use the
     merger tree code, then there is a utility included with Rockstar to
     postprocess the output halo catalogs (i.e., the `out_*.list` files).  To
@@ -261,7 +261,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     Note that the files produced will _not_ be suitable for input into the
     merger tree code above.
     
-7. <h3 id="section.2.7">Lightcones</h3>
+    7. ### Lightcones ###
 
     Lightcones are currently only supported with parallel IO (see options
     above).  To turn on lightcone support, set
@@ -291,7 +291,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     options.  Additionally, you should set "`IGNORE_PARTICLE_IDS = 1`" so as
     to prevent confusion with the same particle ID appearing multiple times.
     
-8. <h3 id="section.2.8">Controlling Output Formats</h3>
+    8. ### Controlling Output Formats ###
 
     
     Rockstar can currently output in either ASCII or binary formats.
@@ -373,7 +373,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     full-particle halo/particle formats, check the `examples/` subdirectory.
     
     
-9. <h3 id="section.2.9">Infiniband / Network Connectivity Notes</h3>
+    9. ### Infiniband / Network Connectivity Notes ###
 
     As particle transfer is usually a small fraction of the total analysis
     time, Rockstar performs well on pretty much any gigabit or faster network.
@@ -389,11 +389,11 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     
     
     
-10. <h3 id="section.2.10">Full Configuration Options</h3>
+    10. ### Full Configuration Options ###
 
     
     
-    1. <h4 id="section.2.10.1">Commonly-Used Options</h4>
+        1. #### Commonly-Used Options ####
 
         
         For those options not mentioned directly above:
@@ -409,7 +409,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         
         Besides the main mass definition, you can specify four other halo mass definitions to calculate,
         in `MASS_DEFINITION2` through `MASS_DEFINITION5`.  The syntax for these is
-        identical to that for `MASS_DEFINITION`; the defaults are listed in Section  [2.4](subsection.2.4).  Note that
+        identical to that for `MASS_DEFINITION`; the defaults are listed in Section  [markdown-header-output](#markdown-header-output).  Note that
         for very low density thresholds (e.g., <150b), you may have to increase the value of `FOF_LINKING_LENGTH` below to obtain accurate masses.
         
         By default, all masses are calculated from FOF groups after
@@ -423,7 +423,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
             STRICT_SO_MASSES = 1 #default: 0
         
         The resulting masses will be present in the auxilliary mass columns
-        (columns 20-24) of the `out_*.list` files.  This option is only available in parallel processing mode (Section  [2.2](subsection.2.2)).  If computing mass functions for snapshots widely separated in redshift, you may also wish to disable temporal halo finding (i.e., using information from previous snapshots to determine host/sub relationships):
+        (columns 20-24) of the `out_*.list` files.  This option is only available in parallel processing mode (Section  [markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus)](#markdown-header-more-complete-setup-(multiple-snapshots/input-files/cpus))).  If computing mass functions for snapshots widely separated in redshift, you may also wish to disable temporal halo finding (i.e., using information from previous snapshots to determine host/sub relationships):
             
             TEMPORAL_HALO_FINDING = 0 #default: 1
         
@@ -504,7 +504,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         
         This will resume analysis with the assumption that all snapshots previous to `RESTART_SNAPSHOT` have been analyzed.
         
-    2. <h4 id="section.2.10.2">Rarely-used Options</h4>
+        2. #### Rarely-used Options ####
 
             
             GADGET_SKIP_NON_HALO_PARTICLES = <0 or 1> #default = 1
@@ -572,7 +572,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
             
             BOUND_PROPS = <0 or 1> #default 1
         
-        This is likely not what you want if you are calculating mass functions; you should use `STRICT_SO_MASSES` instead (Section  [2.10.1](subsubsection.2.10.1)).
+        This is likely not what you want if you are calculating mass functions; you should use `STRICT_SO_MASSES` instead (Section  [markdown-header-commonly-used-options](#markdown-header-commonly-used-options)).
         
         To change the default FOF refinement fraction (see the Rockstar paper),
         change:
@@ -591,7 +591,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
             MIN_HALO_PARTICLES = <minimum number of halo particles> #default: 10
         
         
-        See also `MIN_HALO_OUTPUT_SIZE` in Section  [2.8](subsection.2.8).
+        See also `MIN_HALO_OUTPUT_SIZE` in Section  [markdown-header-controlling-output-formats](#markdown-header-controlling-output-formats).
         
         
         To specify your own load-balancing distribution, you can use the
@@ -610,7 +610,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         the box size in each dimension; the boundary regions are also assumed not to
         be overlapping (it is up to your script to check this).
         
-11. <h3 id="section.2.11">Full Example Scripts</h3>
+    11. ### Full Example Scripts ###
 
     
     For full example configuration files, used for running on the Bolshoi
@@ -619,12 +619,12 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     For the example PBS submission script used to run the halo finding on
     Pleiades, see `scripts/pleiades.pbs`; for Ranger, see `scripts/ranger.pbs`.
     
-<h2 id="section.3">Extending Rockstar</h2>
+## Extending Rockstar ##
 
 
 Rockstar is written in C, and requires no external libraries by default.  Please see the `SOURCE_LAYOUT` file for a brief description of all source code files.
 
-1. <h3 id="section.3.1">Adding More Configuration Parameters</h3>
+    1. ### Adding More Configuration Parameters ###
 
     Config parameters are defined in `config.template.h`.  The syntax is
         
@@ -639,7 +639,7 @@ Rockstar is written in C, and requires no external libraries by default.  Please
     value will be assigned if the config file does not include the
     variable.
     
-2. <h3 id="section.3.2">Adding More Input Formats</h3>
+    2. ### Adding More Input Formats ###
 
     
     If you run Rockstar through YT (<http://yt-project.org/>), you may find that your desired input format is already supported.  Alternatively, if you have existing code to read in particles and output in binary GADGET or ART format (not including HDF5), you can use named pipes to directly communicate the data to Rockstar.  This technique is also useful for analyzing simulation data as the simulation is running.  You can use the script in `scripts/mkpipes.pl` to make named pipes; you should ask it to make as many named pipes as you have files per snapshot.  Then, you would set `FILENAME = /path/to/pipe.<block>`.  To get data into the pipes, you would simply open and print to them like normal files (or use output redirection from `stdout`).  For example, you could have one script per pipe, which would be responsible for writing one block of particles to the pipe from each snapshot.  Since write operations to named pipes will pause execution of the writing program if the pipe has reached its buffer capacity (typically 4KB), the scripts will automatically pause until Rockstar has finished processing an entire snapshot and is ready to read in new data.
@@ -661,12 +661,12 @@ Rockstar is written in C, and requires no external libraries by default.  Please
     
     If you think your code may be useful for others, please consider submitting it as a patch to the authors.  Others will no doubt appreciate it!
     
-3. <h3 id="section.3.3">Adding More Output Formats</h3>
+    3. ### Adding More Output Formats ###
 
     
     Halos are output in the `output_halos()` routine in `io/meta_io.c`.  Halos are stored in the `halos` array, for which the structure is defined in `halo.h`.  Particles are stored in the `p` array, for which the structure is defined in `particle.h`.  It is best to use the `output_binary()` routine from `io/io_internal.c` as a starting template for outputting halo and particle data.
     
-4. <h3 id="section.3.4">Adding More Halo Properties</h3>
+    4. ### Adding More Halo Properties ###
 
     
     All halo properties are calculated in `properties.c`, in the routine `_calc_additional_halo_props()`.  All particles associated with the current halo being analyzed are in the `po` array, which is of type `struct potential` (defined in `potential.h`); particles in the array are sorted by distance from the halo center.  You may either add calculations directly in the main particle loop in `_calc_additional_halo_props()`, or you may decide to create your own particle loop as a separate routine.  If the latter case, don't forget to honor the option to skip over unbound particles unless your calculation always needs to include them; otherwise, you may get strange results for subhalos.
