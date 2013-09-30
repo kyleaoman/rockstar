@@ -23,6 +23,7 @@ while (<>) {
     s/\\S/Section /g;
     s/\\\\\[[^\]]+\]/\n/;
     s/\\\\//g;
+    s/Fig\.\ /Fig. /g;
     s/\\item/+ /;
     s/\\includegraphics\[[^\]]+\]{([^\.]+)\.\w+}/![$1](http:\/\/slac.stanford.edu\/~behroozi\/Rockstar\/$1.png "$1")/g;
     s/\\footnote\{(.*)\}/ [Footnote: $1]/g;
@@ -57,15 +58,15 @@ sub parsetoc {
 	$mdref =~ tr!(/)!!d;
 	$mdref = "markdown-header-".$mdref;
 	$mdref{$ref} = $mdref;
-	if (!($num =~ /\d+\./)) {
+	if (!($num =~ s/\d+\.//)) {
 	    print "* $num. [$title](#$mdref)\n";
 	}
-	elsif (!($num =~ /\d+\.\d+\./)) {
-	    print " "x4,"* $num. [$title](#$mdref)\n";
+	elsif (!($num =~ s/\d+\.//)) {
+	    print " "x4,"$num. [$title](#$mdref)\n";
 	}
 	else {
-	    #$num =~ s/\d+\.//;
-	    print " "x8,"* $num. [$title](#$mdref)\n";
+	    $num =~ s/\d+\.//;
+	    print " "x8,"$num. [$title](#$mdref)\n";
 	}
     }
     close INPUT;
@@ -96,11 +97,11 @@ sub latex {
     if ($c eq "subsection") {
 	$subsec++;
 	$subsubsec = 0;
-	return "+ $sec.$subsec. ### $a ###\n";
+	return "$subsec. ### $a ###\n";
     }
     if ($c eq "subsubsection") {
 	$subsubsec++;
-	return "+ $sec.$subsec.$subsubsec. #### $a ####\n";
+	return "$subsubsec. #### $a ####\n";
     }
     if ($c eq "label") { 
 	if ($infigure) { $labels{$a} = "fig.$fig"; }
