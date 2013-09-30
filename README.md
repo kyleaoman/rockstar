@@ -17,8 +17,8 @@ License: GNU GPLv3
 Science/Documentation Paper: <http://arxiv.org/abs/1110.4372>
 
 ## Contents
-* 1. [Compiling](#markdown-header-compiling)
-* 2. [Running](#markdown-header-running)
+* [Compiling](#markdown-header-compiling)
+* [Running](#markdown-header-running)
     1. [Quick start (single snapshot, single CPU)](#markdown-header-quick-start-single-snapshot,-single-cpu)
     2. [More Complete Setup (multiple snapshots/input files/CPUs)](#markdown-header-more-complete-setup-multiple-snapshotsinput-filescpus)
     3. [Inline Analysis for Simulations](#markdown-header-inline-analysis-for-simulations)
@@ -32,7 +32,7 @@ Science/Documentation Paper: <http://arxiv.org/abs/1110.4372>
         1. [Commonly-Used Options](#markdown-header-commonly-used-options)
         2. [Rarely-used Options](#markdown-header-rarely-used-options)
     11. [Full Example Scripts](#markdown-header-full-example-scripts)
-* 3. [Extending Rockstar](#markdown-header-extending-rockstar)
+* [Extending Rockstar](#markdown-header-extending-rockstar)
     1. [Adding More Configuration Parameters](#markdown-header-adding-more-configuration-parameters)
     2. [Adding More Input Formats](#markdown-header-adding-more-input-formats)
     3. [Adding More Output Formats](#markdown-header-adding-more-output-formats)
@@ -89,7 +89,8 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     Note that periodic boundary conditions are *not* assumed for a single-cpu
     run.  (For that, see the next section, Section  [2.2](#markdown-header-more-complete-setup-multiple-snapshotsinput-filescpus)).
     
-    
+    #### Figure 1
+
     
     ![rockstar_layout](http://slac.stanford.edu/~behroozi/Rockstar/rockstar_layout.png "rockstar_layout")
     Figure 1. *Logical Layout of Parallel Processing*: One master process controls multiple reader and writer (worker) processes.  The reader processes are responsible for loading data and rearranging it into rectangular volumes according to the number of writers.  The writer processes receive data from the readers, analyze it for halos, and write output catalogs to one or more files.  *Physical Layout*: Every CPU should contain one writer process, since this is where the bulk of the analysis time is spent.  The master process consumes very little CPU power, and so can easily be accommodated by the first CPU.  The reader processes also consume very little CPU power; however, they require enough memory to load in all the particle data.  For this reason, they should be distributed evenly across all the nodes.  Rockstar has several configuration parameters to help with launching the right number and the right type of tasks per node; see Section  [2.2](#markdown-header-more-complete-setup-multiple-snapshotsinput-filescpus).
@@ -106,7 +107,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     For running on multiple snapshots or simulations with multiple input
     files per snapshot, Rockstar uses a master process to direct the
     order of processing steps and several client processes to do the
-    actual work (see Fig.\ ??).
+    actual work (see Fig. [1](#markdown-header-figure-1)).
     
     For historical reasons, enabling Rockstar to run on multiple input files,
     multiple snapshots, or multiple CPUs is controlled by setting the following "Parallel
@@ -176,7 +177,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     data output directory (`OUTBASE`) with contact information.
     
     You will then have to start `NUM_READERS` (usually, `NUM_BLOCKS`)
-    reader tasks and `NUM_WRITERS` writer tasks (refer to Fig.\ ?? for task CPU assignment).  To simplify this process,
+    reader tasks and `NUM_WRITERS` writer tasks (refer to Fig. [1](#markdown-header-figure-1) for task CPU assignment).  To simplify this process,
     there are two additional options you can set:
         
         FORK_READERS_FROM_WRITERS = 1

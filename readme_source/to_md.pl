@@ -23,7 +23,7 @@ while (<>) {
     s/\\S/Section /g;
     s/\\\\\[[^\]]+\]/\n/;
     s/\\\\//g;
-    s/Fig\.\ /Fig. /g;
+    s/Fig\.\\ /Fig. /g;
     s/\\item/+ /;
     s/\\includegraphics\[[^\]]+\]{([^\.]+)\.\w+}/![$1](http:\/\/slac.stanford.edu\/~behroozi\/Rockstar\/$1.png "$1")/g;
     s/\\footnote\{(.*)\}/ [Footnote: $1]/g;
@@ -59,7 +59,7 @@ sub parsetoc {
 	$mdref = "markdown-header-".$mdref;
 	$mdref{$ref} = $mdref;
 	if (!($num =~ s/\d+\.//)) {
-	    print "* $num. [$title](#$mdref)\n";
+	    print "* [$title](#$mdref)\n";
 	}
 	elsif (!($num =~ s/\d+\.//)) {
 	    print " "x4,"$num. [$title](#$mdref)\n";
@@ -79,7 +79,7 @@ sub latex {
     if ($c eq "begin") {
 	return "" if ($a eq "document" or $a eq "itemize");
 	if ($a eq "verbatim") { $verbatim = 1; return ""; }
-	if ($a eq "figure") { $infigure=1; $fig++; return ""; }
+	if ($a eq "figure") { $infigure=1; $fig++; return "#### Figure $fig\n"; }
     }
     if ($c eq "end") {
 	return "" if ($a eq "document" or $a eq "itemize");
@@ -117,6 +117,10 @@ sub latex {
 	    my $name = $refs{$a};
 	    $name =~ s/^\w+\.//;
 	    return "[$name](#$mdref{$refs{$a}})";
+	} elsif ($refs{$a} and $refs{$a} =~ /fig/) {
+	    my $name = $refs{$a};
+	    $name =~ s/^\w+\.//;  
+	    return "[$name](#markdown-header-figure-$name)";
 	}
 	else { return "??"; }
     }
