@@ -17,6 +17,7 @@ while (<>) {
     if (/tableofcontents/) { parsetoc($filename); next; }
     s/\$<\$/</g;
     s/\$>\$/>/g;
+    if (/\\noindent\{\}/) { print "\n" }
     s/``/"/g;
     s/''/"/g;
     s/\\S/Section /g;
@@ -56,14 +57,14 @@ sub parsetoc {
 	$mdref =~ tr!(/)!!d;
 	$mdref = "markdown-header-".$mdref;
 	$mdref{$ref} = $mdref;
-	if (!($num =~ s/\d+\.//)) {
-	    print "* [$title](#$mdref)\n";
+	if (!($num =~ /\d+\./)) {
+	    print "* $num. [$title](#$mdref)\n";
 	}
-	elsif (!($num =~ s/\d+\.//)) {
+	elsif (!($num =~ /\d+\.\d+\./)) {
 	    print " "x4,"$num. [$title](#$mdref)\n";
 	}
 	else {
-	    $num =~ s/\d+\.//;
+	    #$num =~ s/\d+\.//;
 	    print " "x8,"$num. [$title](#$mdref)\n";
 	}
     }

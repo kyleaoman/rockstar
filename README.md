@@ -6,33 +6,37 @@
 
 
 
+
 # The Rockstar Halo Finder
 
+
 Most code: Copyright (C)2011-2013 Peter Behroozi
+
 License: GNU GPLv3
+
 Science/Documentation Paper: <http://arxiv.org/abs/1110.4372>
 
 ## Contents
-* [Compiling](#markdown-header-compiling)
-* [Running](#markdown-header-running)
-    1. [Quick start (single snapshot, single CPU)](#markdown-header-quick-start-single-snapshot,-single-cpu)
-    2. [More Complete Setup (multiple snapshots/input files/CPUs)](#markdown-header-more-complete-setup-multiple-snapshotsinput-filescpus)
-    3. [Inline Analysis for Simulations](#markdown-header-inline-analysis-for-simulations)
-    4. [Output](#markdown-header-output)
-    5. [Merger Trees](#markdown-header-merger-trees)
-    6. [Host / Subhalo Relationships](#markdown-header-host--subhalo-relationships)
-    7. [Lightcones](#markdown-header-lightcones)
-    8. [Controlling Output Formats](#markdown-header-controlling-output-formats)
-    9. [Infiniband / Network Connectivity Notes](#markdown-header-infiniband--network-connectivity-notes)
-    10. [Full Configuration Options](#markdown-header-full-configuration-options)
-        1. [Commonly-Used Options](#markdown-header-commonly-used-options)
-        2. [Rarely-used Options](#markdown-header-rarely-used-options)
-    11. [Full Example Scripts](#markdown-header-full-example-scripts)
-* [Extending Rockstar](#markdown-header-extending-rockstar)
-    1. [Adding More Configuration Parameters](#markdown-header-adding-more-configuration-parameters)
-    2. [Adding More Input Formats](#markdown-header-adding-more-input-formats)
-    3. [Adding More Output Formats](#markdown-header-adding-more-output-formats)
-    4. [Adding More Halo Properties](#markdown-header-adding-more-halo-properties)
+* 1. [Compiling](#markdown-header-compiling)
+* 2. [Running](#markdown-header-running)
+    2.1. [Quick start (single snapshot, single CPU)](#markdown-header-quick-start-single-snapshot,-single-cpu)
+    2.2. [More Complete Setup (multiple snapshots/input files/CPUs)](#markdown-header-more-complete-setup-multiple-snapshotsinput-filescpus)
+    2.3. [Inline Analysis for Simulations](#markdown-header-inline-analysis-for-simulations)
+    2.4. [Output](#markdown-header-output)
+    2.5. [Merger Trees](#markdown-header-merger-trees)
+    2.6. [Host / Subhalo Relationships](#markdown-header-host--subhalo-relationships)
+    2.7. [Lightcones](#markdown-header-lightcones)
+    2.8. [Controlling Output Formats](#markdown-header-controlling-output-formats)
+    2.9. [Infiniband / Network Connectivity Notes](#markdown-header-infiniband--network-connectivity-notes)
+    2.10. [Full Configuration Options](#markdown-header-full-configuration-options)
+        2.10.1. [Commonly-Used Options](#markdown-header-commonly-used-options)
+        2.10.2. [Rarely-used Options](#markdown-header-rarely-used-options)
+    2.11. [Full Example Scripts](#markdown-header-full-example-scripts)
+* 3. [Extending Rockstar](#markdown-header-extending-rockstar)
+    3.1. [Adding More Configuration Parameters](#markdown-header-adding-more-configuration-parameters)
+    3.2. [Adding More Input Formats](#markdown-header-adding-more-input-formats)
+    3.3. [Adding More Output Formats](#markdown-header-adding-more-output-formats)
+    3.4. [Adding More Halo Properties](#markdown-header-adding-more-halo-properties)
 
 
 
