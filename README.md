@@ -47,7 +47,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
 
 ## Running ##
 
-    1. ### Quick start (single snapshot, single CPU) ###
+1. ### Quick start (single snapshot, single CPU) ###
 
     Several example configuration files have been provided.  If you have a
     small simulation file and you'd like to run Rockstar on a single processor
@@ -92,7 +92,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     
     
     
-    2. ### More Complete Setup (multiple snapshots/input files/CPUs) ###
+2. ### More Complete Setup (multiple snapshots/input files/CPUs) ###
 
     
     Note: Rockstar does _not_ use MPI for its parallelization.  As such,
@@ -205,11 +205,11 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     as you would normally.  Rockstar will resume analysis from the last incomplete
     snapshot.
     
-    3. ### Inline Analysis for Simulations ###
+3. ### Inline Analysis for Simulations ###
 
     For very large simulations, it is possible to have Rockstar run on particle snapshots as they become available.  If writing the snapshots to disk is not an option, Rockstar can also accept particle input from pipes (see Section  [markdown-header-adding-more-input-formats](#markdown-header-adding-more-input-formats)).  It is strongly recommended that you contact the authors for assistance before running an important simulation this way.
     
-    4. ### Output ###
+4. ### Output ###
 
     
     Rockstar can output in many different formats (see Section  [markdown-header-controlling-output-formats](#markdown-header-controlling-output-formats) below).  If run in single-processor mode, halos are saved to a file called `halos_0.0.ascii` with one line per halo.  If run in multi-processor mode, halos are saved to files called `out_0.list`, `out_1.list`, etc., with one file per particle snapshot.  Many halo properties are currently calculated by default:
@@ -225,7 +225,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     
     Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see Section  [markdown-header-adding-more-halo-properties](#markdown-header-adding-more-halo-properties).
     
-    5. ### Merger Trees ###
+5. ### Merger Trees ###
 
     
     By default, the output files for Rockstar include some basic descendant
@@ -241,7 +241,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     Consistent Trees README file for use).  It is _very_ important to use the
     same version of this script as the Rockstar version that you used for analysis.
     
-    6. ### Host / Subhalo Relationships ###
+6. ### Host / Subhalo Relationships ###
 
     By default, the output files for Rockstar do not include information
     about which halos are hosts (as opposed to subhalos).  This is because
@@ -261,7 +261,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     Note that the files produced will _not_ be suitable for input into the
     merger tree code above.
     
-    7. ### Lightcones ###
+7. ### Lightcones ###
 
     Lightcones are currently only supported with parallel IO (see options
     above).  To turn on lightcone support, set
@@ -291,7 +291,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     options.  Additionally, you should set "`IGNORE_PARTICLE_IDS = 1`" so as
     to prevent confusion with the same particle ID appearing multiple times.
     
-    8. ### Controlling Output Formats ###
+8. ### Controlling Output Formats ###
 
     
     Rockstar can currently output in either ASCII or binary formats.
@@ -373,7 +373,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     full-particle halo/particle formats, check the `examples/` subdirectory.
     
     
-    9. ### Infiniband / Network Connectivity Notes ###
+9. ### Infiniband / Network Connectivity Notes ###
 
     As particle transfer is usually a small fraction of the total analysis
     time, Rockstar performs well on pretty much any gigabit or faster network.
@@ -389,11 +389,11 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     
     
     
-    10. ### Full Configuration Options ###
+10. ### Full Configuration Options ###
 
     
     
-        1. #### Commonly-Used Options ####
+    1. #### Commonly-Used Options ####
 
         
         For those options not mentioned directly above:
@@ -504,7 +504,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         
         This will resume analysis with the assumption that all snapshots previous to `RESTART_SNAPSHOT` have been analyzed.
         
-        2. #### Rarely-used Options ####
+    2. #### Rarely-used Options ####
 
             
             GADGET_SKIP_NON_HALO_PARTICLES = <0 or 1> #default = 1
@@ -610,7 +610,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         the box size in each dimension; the boundary regions are also assumed not to
         be overlapping (it is up to your script to check this).
         
-    11. ### Full Example Scripts ###
+11. ### Full Example Scripts ###
 
     
     For full example configuration files, used for running on the Bolshoi
@@ -624,7 +624,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
 
 Rockstar is written in C, and requires no external libraries by default.  Please see the `SOURCE_LAYOUT` file for a brief description of all source code files.
 
-    1. ### Adding More Configuration Parameters ###
+1. ### Adding More Configuration Parameters ###
 
     Config parameters are defined in `config.template.h`.  The syntax is
         
@@ -639,7 +639,7 @@ Rockstar is written in C, and requires no external libraries by default.  Please
     value will be assigned if the config file does not include the
     variable.
     
-    2. ### Adding More Input Formats ###
+2. ### Adding More Input Formats ###
 
     
     If you run Rockstar through YT (<http://yt-project.org/>), you may find that your desired input format is already supported.  Alternatively, if you have existing code to read in particles and output in binary GADGET or ART format (not including HDF5), you can use named pipes to directly communicate the data to Rockstar.  This technique is also useful for analyzing simulation data as the simulation is running.  You can use the script in `scripts/mkpipes.pl` to make named pipes; you should ask it to make as many named pipes as you have files per snapshot.  Then, you would set `FILENAME = /path/to/pipe.<block>`.  To get data into the pipes, you would simply open and print to them like normal files (or use output redirection from `stdout`).  For example, you could have one script per pipe, which would be responsible for writing one block of particles to the pipe from each snapshot.  Since write operations to named pipes will pause execution of the writing program if the pipe has reached its buffer capacity (typically 4KB), the scripts will automatically pause until Rockstar has finished processing an entire snapshot and is ready to read in new data.
@@ -661,12 +661,12 @@ Rockstar is written in C, and requires no external libraries by default.  Please
     
     If you think your code may be useful for others, please consider submitting it as a patch to the authors.  Others will no doubt appreciate it!
     
-    3. ### Adding More Output Formats ###
+3. ### Adding More Output Formats ###
 
     
     Halos are output in the `output_halos()` routine in `io/meta_io.c`.  Halos are stored in the `halos` array, for which the structure is defined in `halo.h`.  Particles are stored in the `p` array, for which the structure is defined in `particle.h`.  It is best to use the `output_binary()` routine from `io/io_internal.c` as a starting template for outputting halo and particle data.
     
-    4. ### Adding More Halo Properties ###
+4. ### Adding More Halo Properties ###
 
     
     All halo properties are calculated in `properties.c`, in the routine `_calc_additional_halo_props()`.  All particles associated with the current halo being analyzed are in the `po` array, which is of type `struct potential` (defined in `potential.h`); particles in the array are sorted by distance from the halo center.  You may either add calculations directly in the main particle loop in `_calc_additional_halo_props()`, or you may decide to create your own particle loop as a separate routine.  If the latter case, don't forget to honor the option to skip over unbound particles unless your calculation always needs to include them; otherwise, you may get strange results for subhalos.
