@@ -36,7 +36,7 @@ void load_particles_tipsy(char *filename, struct particle **p, int64_t *num_p) {
   if (header.ndim != 3) {
       xdr_destroy(&xdrs);
       fseek(input, 0L, SEEK_SET);
-      check_fread((char *)&header,sizeof(header),1,stdin);
+      check_fread((char *)&header,sizeof(header),1,input);
       assert(header.ndim == 3);
       xdrfmt = 0;
       }
@@ -161,7 +161,7 @@ int load_ids_tipsy(char *filename, struct tipsy_dump header, int **iords, int *n
       fclose(iordf);
   }
 
-  if (count == nbodies) {
+  if (iordf && (count == nbodies)) {
     printf("Read %d iords.\n",count);
     *num_iords = nbodies;
     return 1;
