@@ -654,7 +654,7 @@ Rockstar is written in C, and requires no external libraries by default.  Please
         void load_particles_mytype(char *filename, struct particle **p, 
         int64_t *num_p)
     
-    This routine should add the number of particles in the filename to `num_p` and grow the particle structure appropriately, e.g.,
+    This routine should add the number of particles in the file to `num_p` and grow the particle structure appropriately, e.g.,
         
         check_realloc_s(p[0], sizeof(struct particle), num_p[0] + num_new_p);
     

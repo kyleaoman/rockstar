@@ -607,7 +607,7 @@ For highest efficiency, it is appropriate to copy one of the existing \texttt{io
     void load_particles_mytype(char *filename, struct particle **p, 
 	       				  int64_t *num_p)
 \end{verbatim}					  
-This routine should add the number of particles in the filename to \texttt{num\_p} and grow the particle structure appropriately, e.g.,
+This routine should add the number of particles in the file to \texttt{num\_p} and grow the particle structure appropriately, e.g.,
 \begin{verbatim}
      check_realloc_s(p[0], sizeof(struct particle), num_p[0] + num_new_p);
 \end{verbatim}
