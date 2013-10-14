@@ -20,9 +20,9 @@ void load_particles_tipsy(char *filename, struct particle **p, int64_t *num_p) {
   FILE *input;
   struct tipsy_dump header;
   struct tipsy_dark_particle dark;
+  struct tipsy_gas_particle gas;
 #ifdef TIPSY_READ_GAS_STARS
   struct tipsy_star_particle star;
-  struct tipsy_gas_particle gas;
 #endif /*TIPSY_READ_GAS_STARS*/
 
   int i, j;
@@ -66,6 +66,14 @@ void load_particles_tipsy(char *filename, struct particle **p, int64_t *num_p) {
 	  }
       }
   (*num_p) += header.nsph;  
+#else
+  if (!xdrfmt) {
+    fseek(input, sizeof(struct tipsy_gas_particle)*header.nsph, SEEK_CUR);
+  }
+  else {
+    for (i=0; i<header.nsph; i++) assert(tipsy_xdr_gas(&xdrs, &gas) > 0);
+  }
+  fprintf(stderr, "[Warning] Rockstar is skipping TIPSY gas and star particles and calculating halos from dark matter only.  If this is not what you want, inquire with the authors about Rockstar-Galaxies.\n");
 #endif
 
   for(i = 0; i < header.ndark; i++) {
@@ -167,7 +175,7 @@ int load_ids_tipsy(char *filename, struct tipsy_dump header, int **iords, int *n
     return 1;
   }
   else {
-    printf("WARNING: Did not read iords file\n");
+    fprintf(stderr, "[Warning] Did not read TIPSY iords file; particle IDs may not be correct.\n");
     if (*iords) free(*iords);
     *iords=NULL;
     *num_iords = 0;
