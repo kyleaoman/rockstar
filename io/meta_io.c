@@ -318,12 +318,8 @@ void output_halos(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
       || (TEMPORAL_HALO_FINDING && !LIGHTCONE))
     output_binary(id_offset, snap, chunk, bounds, 1);
 
-  if (chunk<FULL_PARTICLE_CHUNKS) {
-    if (!fork()) {
-      output_full_particles(id_offset, snap, chunk, bounds);
-      exit(0);
-    }
-  }
+  if (chunk<FULL_PARTICLE_CHUNKS)
+    output_full_particles(id_offset, snap, chunk, bounds);
 
   if (DUMP_PARTICLES[0] && (chunk >= DUMP_PARTICLES[1] &&
 			    chunk <= DUMP_PARTICLES[2]))
