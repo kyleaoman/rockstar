@@ -264,8 +264,9 @@ void check_num_writers(void) {
   int64_t factors[3] = {0};
   factor_3(NUM_WRITERS, factors);
   if ((factors[0] < 2) || (factors[1] < 2) || (factors[2] < 2)) {
-    fprintf(stderr, "[Error] NUM_WRITERS should be the product of at least three factors larger than 1!\n");
-    fprintf(stderr, "[Error] (Currently, %"PRId64" = %"PRId64" x %"PRId64" x %"PRId64"\n", NUM_WRITERS, factors[0], factors[1], factors[2]);
+    fprintf(stderr, "[Error] NUM_WRITERS should be the product of at least three factors larger than 1 for periodic boundary conditions to be enabled!\n");
+    fprintf(stderr, "[Error] (Currently, NUM_WRITERS = %"PRId64" = %"PRId64" x %"PRId64" x %"PRId64")\n", NUM_WRITERS, factors[0], factors[1], factors[2]);
+    fprintf(stderr, "[Error] Please adjust NUM_WRITERS or set PERIODIC=0 in the config file.\n");
     exit(1);
   }
 }
