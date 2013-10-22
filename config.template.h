@@ -67,6 +67,7 @@ integer(FULL_PARTICLE_CHUNKS, 0);
 string(BGC2_SNAPNAMES, "");
 
 integer(SHAPE_ITERATIONS, 10);
+integer(WEIGHTED_SHAPES, 1);
 integer(BOUND_PROPS, 1);
 integer(BOUND_OUT_TO_HALO_EDGE, 0);
 integer(DO_MERGER_TREE_ONLY, 0);

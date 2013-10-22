@@ -208,7 +208,7 @@ void calc_shape(struct halo *h, int64_t total_p, int64_t bound) {
 	r += dr*dr/eig[k];
       }
       if (!(r>0 && r<=1)) continue;
-      double tw = 1.0/r;
+      double tw = (WEIGHTED_SHAPES) ? 1.0/r : 1.0;
       weight+=tw;
       for (k=0; k<3; k++) {
 	dr = po[j].pos[k]-h->pos[k];
@@ -334,7 +334,15 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
     h->vrms = sqrt(vrms[0] + vrms[1] + vrms[2]); 
     h->vmax = VMAX_CONST*sqrt(vmax*vmax_conv);
     h->rvmax = rvmax*1e3;
+    
+    h->r = cbrt((3.0/(4.0*M_PI))*np_alt[2]/particle_thresh_dens[3])*1e3;
+    calc_shape(h,np_alt[2],bound);
+    h->b_to_a2 = h->b_to_a;
+    h->c_to_a2 = h->c_to_a;
+    memcpy(h->A2, h->A, sizeof(float)*3);
     h->r = cbrt((3.0/(4.0*M_PI))*part_mdelta/particle_thresh_dens[0])*1e3;
+    calc_shape(h,dens_tot,bound);
+
     rvir = cbrt((3.0/(4.0*M_PI))*np_vir/particle_rvir_dens)*1e3;
     mvir = np_vir*PARTICLE_MASS;
     calc_scale_radius(h, m, h->r, h->vmax, h->rvmax, SCALE_NOW, po, dens_tot, bound);
@@ -343,11 +351,6 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
     Jh = PARTICLE_MASS*SCALE_NOW*sqrt(L[0]*L[0] + L[1]*L[1] + L[2]*L[2]);
     h->spin = (m>0) ? (Jh * sqrt(fabs(h->energy)) / (Gc*pow(m, 2.5))) : 0;
     h->bullock_spin = (m>0) ? (Jh / (mvir*sqrt(2.0*Gc*mvir*rvir*SCALE_NOW/1e3))) : 0;
-    calc_shape(h,np_alt[2],bound);
-    h->b_to_a2 = h->b_to_a;
-    h->c_to_a2 = h->c_to_a;
-    memcpy(h->A2, h->A, sizeof(float)*3);
-    calc_shape(h,dens_tot,bound);
   }
 }
 

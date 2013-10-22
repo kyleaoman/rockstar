@@ -191,7 +191,7 @@ Rockstar can output in many different formats (see \S \ref{s:output_formats} bel
 \item Halo radii: $R_\mathrm{vir}$ and the scale radius $r_s$, calculated both using profile fitting and using the Klypin $v_\mathrm{max}$ method.
 \item Halo center positions and velocities.
 \item Halo spin (both Bullock and Peebles) and angular momentum.
-\item Halo shapes and principal axes, using the Allgood method, at both $R_\mathrm{vir}$ and $R_\mathrm{500c}$.
+\item Halo shapes and principal axes, using the Allgood method (iterative, weighted by $1/r^2$), at both $R_\mathrm{vir}$ and $R_\mathrm{500c}$.  See \S \ref{s:common_options} for how to change the shape calculation method.
 \item The ratio of halo kinetic to potential energy, and the center position and velocity offsets from the halo's bulk average position and velocity.
 \end{itemize}
 
@@ -390,6 +390,17 @@ Information about each of the columns in both file types (including units) is av
 \begin{verbatim}
           TEMPORAL_HALO_FINDING = 0 #default: 1
 \end{verbatim}
+
+	Shape calculations are by default performed with the Allgood method.  If you wish to change this, you can specify
+\begin{verbatim}
+          WEIGHTED_SHAPES = 0 #default: 1
+\end{verbatim}
+	which will calculate the mass tensor without weighting by $1/r^2$.  In addition, if you do not want the shapes to be calculated iteratively, specify
+\begin{verbatim}
+          SHAPE_ITERATIONS = 1 #default: 10
+\end{verbatim}
+	This setting specifies the maximum number of shape calculation iterations to perform.
+
       Options to set the base cosmology are available:
 \begin{verbatim}
           SCALE_NOW = <current cosmological scale factor>
@@ -613,7 +624,7 @@ This routine should add the number of particles in the file to \texttt{num\_p} a
 \end{verbatim}
 Note that \texttt{check\_realloc\_s()} is defined in \texttt{check\_syscalls.h}.  It is generally a good idea to use the IO routines defined in that header, as they will automatically halt the program if they encounter any errors reading, writing, or opening files, making debugging much easier.  Routines helpful for reading Fortran-unformatted files and files encoded in a different endianness are available from \texttt{io/io\_util.h}.
 
-The particle structure is very simple; it is described in \texttt{particle.h}.  Your routine should convert everything to Rockstar's internal units: i.e., comoving Mpc/h for positions and non-comoving km/s for peculiar velocities.  Your routine should also set as many config variables as possible (e.g., \texttt{BOX\_SIZE}, \texttt{PARTICLE\_MASS}, cosmology, etc.) from the data header, as that will reduce the chance for errors in the analysis from incorrectly-supplied config variables.
+The particle structure is very simple; it is described in \texttt{particle.h}.  Your routine should convert everything to Rockstar's internal units: i.e., comoving Mpc/h for positions and non-comoving km/s for peculiar velocities.  Your routine should also set as many config variables as possible (e.g., \texttt{BOX\_SIZE}, \texttt{PARTICLE\_MASS}, cosmology, current scale factor, etc.) from the data header, as that will reduce the chance for errors in the analysis from incorrectly-supplied config variables.
 
 Once you have created a new \texttt{io/io\_mytype.c} file, you should create a corresponding header file and include it in \texttt{io/meta\_io.c}.  You can then add a new condition in the \texttt{read\_particles()} routine in \texttt{io/meta\_io.c} to call your code when the \texttt{FILE\_FORMAT} variable matches your filetype.  Finally, you should add the new \texttt{io/io\_mytype.c} file to the \texttt{Makefile} so that it gets compiled along with the other Rockstar source code.
 
