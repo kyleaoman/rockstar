@@ -854,7 +854,6 @@ float fast3tree_find_next_closest_distance(struct fast3tree *t, struct fast3tree
   }
   int64_t counts = 0;
   min_dist = _fast3tree_find_next_closest_dist(t->root,c,sqrt(min_dist), nd, &counts);
-  //printf("%"PRId64"\n", counts);
   return min_dist;
 }
 

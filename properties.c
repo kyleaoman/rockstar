@@ -179,12 +179,13 @@ void calculate_corevel(struct halo *h, struct potential *po, int64_t total_p) {
 
 void calc_shape(struct halo *h, int64_t total_p, int64_t bound) {
   int64_t i,j,k,l,iter=SHAPE_ITERATIONS, analyze_p=0, a,b,c;
-  float b_to_a, c_to_a;
+  float b_to_a, c_to_a, min_r = FORCE_RES*FORCE_RES;
   double mass_t[3][3], orth[3][3], eig[3]={0},  r=0, dr, dr2, weight=0;
   h->b_to_a = h->c_to_a = 0;
   memset(h->A, 0, sizeof(float)*3);
 
   if (!(h->r>0)) return;
+  min_r *= 1e6 / (h->r*h->r);
   for (j=0; j<total_p; j++) {
     if (bound && (po[j].pe < po[j].ke)) continue;
     analyze_p++;
@@ -204,9 +205,12 @@ void calc_shape(struct halo *h, int64_t total_p, int64_t bound) {
       if (bound && (po[j].pe < po[j].ke)) continue;
       r=0;
       for (k=0; k<3; k++) {
-	for (dr=0,l=0; l<3; l++) dr += orth[k][l]*(po[j].pos[l]-h->pos[l]);
+	for (dr=0,l=0; l<3; l++) {
+	  dr += orth[k][l]*(po[j].pos[l]-h->pos[l]);
+	}
 	r += dr*dr/eig[k];
       }
+      if (r < min_r) r = min_r;
       if (!(r>0 && r<=1)) continue;
       double tw = (WEIGHTED_SHAPES) ? 1.0/r : 1.0;
       weight+=tw;
