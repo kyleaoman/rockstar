@@ -448,11 +448,13 @@ void _fast3tree_find_sphere_offset(struct tree3_node *n, struct fast3tree_result
   int64_t i,j;
   float r2, dist, dx;
 
+  int64_t onlyone = (marked && (n->flags & FAST3TREE_MARKED)) ? 1 : 0;
+
   if (_fast3tree_box_not_intersect_sphere(n,c2,r*1.01)) return;
   if (_fast3tree_box_inside_sphere(n,c2,r*0.99)) { /* Entirely inside sphere */
     if (do_marking) n->flags |= FAST3TREE_MARKED;
     _fast3tree_check_results_space(n,res);
-    if (marked) {
+    if (onlyone) {
       res->points[res->num_points++] = n->points;
       return;
     }
@@ -461,8 +463,6 @@ void _fast3tree_find_sphere_offset(struct tree3_node *n, struct fast3tree_result
     res->num_points += n->num_points;
     return;
   }
-
-  int64_t onlyone = (marked && (n->flags & FAST3TREE_MARKED)) ? 1 : 0;
 
   if (n->div_dim < 0) { /* Leaf node */
     r2 = r*r;
