@@ -98,6 +98,7 @@ void _load_particles_art_v2_b(FILE *input, struct particle **p, int64_t *num_p, 
   while ((total_read < np) && !feof(input)) {
     fread_fortran(&p_in_record, sizeof(uint32_t), 1, input, SWAP_ENDIANNESS);
     assert(total_read + p_in_record <= np);
+    assert(p_in_record > 0);
     check_realloc_var(buffer, sizeof(float), bsize, 6*p_in_record);
 
     //Positions, velocities, then skip particle masses before reading IDs
