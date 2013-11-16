@@ -354,7 +354,7 @@ void output_bgc2(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
     fclose(output);
 
     free(hdr);
-    check_realloc_s(pd, 0, 0);
+    free(pd);
     check_realloc_s(gd, 0, 0);
   }
 }
