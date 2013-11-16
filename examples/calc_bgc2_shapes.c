@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   else printf("#Both bound and unbound particles are used.\n");
   printf("#Assumed force resolution (min. radius): %f Mpc/h\n", FORCE_RES);
   printf("#Maximum number of shape iterations: %"PRId64"\n", SHAPE_ITERATIONS);
-  printf("#Shapes are %s\n", (WEIGHTED_SHAPES ? "weighted" : "unweighted"));
+  printf("#Using halo %s\n", (USE_COM ? "center of mass" : "density peak"));
   printf("#b_to_a, c_to_a: Ratio of second and third largest shape ellipsoid axes (B and C) to largest shape ellipsoid axis (A) (dimensionless).\n#  Shapes are determined by the method in Allgood et al. (2006).\n#A[x],A[y],A[z]: Largest shape ellipsoid axis (kpc/h comoving)\n#All particles are considered (bound and unbound) so these measurements\n#  may differ from the Rockstar catalogs, especially for subhalos.\n");
   for (i=8; i<argc; i++) {
     num_groups = num_parts = 0;
@@ -112,11 +112,11 @@ int main(int argc, char **argv) {
 
       h.r = rfrac*sqrt(h.r)*1e3;
       h.m = (h.r) ? (k+1)*PARTICLE_MASS : 0;
-      if (USE_COM && k>0)
-	for (int64_t l=0; l<3; l++) h.pos[l] = pos[l]/(double)k;
+      if (USE_COM && h.r)
+	for (int64_t l=0; l<3; l++) h.pos[l] = pos[l]/(double)(k+1);
       calc_shape(&h, k, BOUND_PROPS);
       printf("%"PRId64" %"PRId64" %e %f %f %f %f %f %f %f %f %e %f %f %f %f %f\n",
-	     grps[j].id, grps[j].parent_id, grps[j].mass, 1e3*grps[j].radius, grps[j].vmax, grps[j].pos[0], grps[j].pos[1], grps[j].pos[2], grps[j].vel[0], grps[j].vel[1], grps[j].vel[2], k*PARTICLE_MASS, h.A[0], h.A[1], h.A[2], h.b_to_a, h.c_to_a);
+	     grps[j].id, grps[j].parent_id, grps[j].mass, 1e3*grps[j].radius, grps[j].vmax, grps[j].pos[0], grps[j].pos[1], grps[j].pos[2], grps[j].vel[0], grps[j].vel[1], grps[j].vel[2], (k+1)*PARTICLE_MASS, h.A[0], h.A[1], h.A[2], h.b_to_a, h.c_to_a);
       p_start += grps[j].npart;
     }
   }
