@@ -195,7 +195,9 @@ Rockstar can output in many different formats (see \S \ref{s:output_formats} bel
 \item The ratio of halo kinetic to potential energy, and the center position and velocity offsets from the halo's bulk average position and velocity.
 \end{itemize}
 
-Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see \S \ref{s:new_properties}.
+Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see \S \ref{s:new_properties}.  
+
+
 
 \subsection{Merger Trees}
 	\label{s:merger_trees}
@@ -337,6 +339,14 @@ Information about each of the columns in both file types (including units) is av
 
       For additional useful source code to load in both the BGC2 and
       full-particle halo/particle formats, check the \texttt{examples/} subdirectory.
+
+\subsection{Comparing to Published Mass Functions}
+
+      By default Rockstar calculates halo and subhalo masses using particles from the surrounding friends-of-friends group with unbound particles removed.  This leads to halo masses which are very consistent for merger trees, but which are a few percent below published spherical overdensity (SO) calibrations.  For comparing to calibrated mass functions, the simplest approach is to generate BGC2 files (see \S \ref{s:output_formats}, above).  If you don't have software to read BGC2 files, you can use the BGC2 to ASCII converter supplied with Rockstar:
+\begin{verbatim}
+         /path/to/rockstar/util/bgc2_to_ascii -c rockstar.cfg -s <snap>
+\end{verbatim}
+You should then calculate mass functions from the resulting output; subhalos can be excluded by skipping halos which do not have \texttt{PID=-1}.
 
 
 \subsection{Infiniband / Network Connectivity Notes}

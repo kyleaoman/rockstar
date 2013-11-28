@@ -27,11 +27,12 @@ Science/Documentation Paper: <http://arxiv.org/abs/1110.4372>
     6. [Host / Subhalo Relationships](#markdown-header-host--subhalo-relationships)
     7. [Lightcones](#markdown-header-lightcones)
     8. [Controlling Output Formats](#markdown-header-controlling-output-formats)
-    9. [Infiniband / Network Connectivity Notes](#markdown-header-infiniband--network-connectivity-notes)
-    10. [Full Configuration Options](#markdown-header-full-configuration-options)
+    9. [Comparing to Published Mass Functions](#markdown-header-comparing-to-published-mass-functions)
+    10. [Infiniband / Network Connectivity Notes](#markdown-header-infiniband--network-connectivity-notes)
+    11. [Full Configuration Options](#markdown-header-full-configuration-options)
         1. [Commonly-Used Options](#markdown-header-commonly-used-options)
         2. [Rarely-used Options](#markdown-header-rarely-used-options)
-    11. [Full Example Scripts](#markdown-header-full-example-scripts)
+    12. [Full Example Scripts](#markdown-header-full-example-scripts)
 * [Extending Rockstar](#markdown-header-extending-rockstar)
     1. [Adding More Configuration Parameters](#markdown-header-adding-more-configuration-parameters)
     2. [Adding More Input Formats](#markdown-header-adding-more-input-formats)
@@ -194,7 +195,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         
         /path/to/rockstar -c OUTBASE/auto-rockstar.cfg
     
-    As noted above, `OUTBASE` is the current working directory by default; however, if you change it in the config file, the `auto-rockstar.cfg` file will be written to that location as well.  Rockstar does not come with a command to start itself on many machines at the same time; however, the utilities which come with various MPI installations (e.g., `mpirun/mpiexec/ibrun`) are often suitable for doing so.  See Section  [2.11](#markdown-header-full-example-scripts) for info about example startup scripts.
+    As noted above, `OUTBASE` is the current working directory by default; however, if you change it in the config file, the `auto-rockstar.cfg` file will be written to that location as well.  Rockstar does not come with a command to start itself on many machines at the same time; however, the utilities which come with various MPI installations (e.g., `mpirun/mpiexec/ibrun`) are often suitable for doing so.  See Section  [2.12](#markdown-header-full-example-scripts) for info about example startup scripts.
     
     In terms of memory usage, Rockstar will use about 60 bytes / particle
     _maximum total_ for a cosmological simulation.  Thus, if you have a
@@ -224,11 +225,13 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     +  Halo radii: Rvir and the scale radius r_s, calculated both using profile fitting and using the Klypin v_max method.
     +  Halo center positions and velocities.
     +  Halo spin (both Bullock and Peebles) and angular momentum.
-    +  Halo shapes and principal axes, using the Allgood method, at both Rvir and R500c.
+    +  Halo shapes and principal axes, using the Allgood method (iterative, weighted by 1/r^2), at both Rvir and R500c.  See Section  [2.11.1](#markdown-header-commonly-used-options) for how to change the shape calculation method.
     +  The ratio of halo kinetic to potential energy, and the center position and velocity offsets from the halo's bulk average position and velocity.
     
     
-    Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see Section  [3.4](#markdown-header-adding-more-halo-properties).
+    Information about each of the columns in both file types (including units) is available in the ASCII headers.  If you would like to calculate more halo properties, please see Section  [3.4](#markdown-header-adding-more-halo-properties).  
+    
+    
     
 5. ### Merger Trees ###
 
@@ -377,8 +380,17 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     For additional useful source code to load in both the BGC2 and
     full-particle halo/particle formats, check the `examples/` subdirectory.
     
+9. ### Comparing to Published Mass Functions ###
+
     
-9. ### Infiniband / Network Connectivity Notes ###
+    By default Rockstar calculates halo and subhalo masses using particles from the surrounding friends-of-friends group with unbound particles removed.  This leads to halo masses which are very consistent for merger trees, but which are a few percent below published spherical overdensity (SO) calibrations.  For comparing to calibrated mass functions, the simplest approach is to generate BGC2 files (see Section  [2.8](#markdown-header-controlling-output-formats), above).  If you don't have software to read BGC2 files, you can use the BGC2 to ASCII converter supplied with Rockstar:
+        
+        /path/to/rockstar/util/bgc2_to_ascii -c rockstar.cfg -s <snap>
+    
+    You should then calculate mass functions from the resulting output; subhalos can be excluded by skipping halos which do not have `PID=-1`.
+    
+    
+10. ### Infiniband / Network Connectivity Notes ###
 
     As particle transfer is usually a small fraction of the total analysis
     time, Rockstar performs well on pretty much any gigabit or faster network.
@@ -394,7 +406,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     
     
     
-10. ### Full Configuration Options ###
+11. ### Full Configuration Options ###
 
     
     
@@ -431,6 +443,17 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         (columns 20-24) of the `out_*.list` files.  This option is only available in parallel processing mode (Section  [2.2](#markdown-header-more-complete-setup-multiple-snapshotsinput-filescpus)).  If computing mass functions for snapshots widely separated in redshift, you may also wish to disable temporal halo finding (i.e., using information from previous snapshots to determine host/sub relationships):
             
             TEMPORAL_HALO_FINDING = 0 #default: 1
+        
+        
+        Shape calculations are by default performed with the Allgood method.  If you wish to change this, you can specify
+            
+            WEIGHTED_SHAPES = 0 #default: 1
+        
+        which will calculate the mass tensor without weighting by 1/r^2.  In addition, if you do not want the shapes to be calculated iteratively, specify
+            
+            SHAPE_ITERATIONS = 1 #default: 10
+        
+        This setting specifies the maximum number of shape calculation iterations to perform.
         
         Options to set the base cosmology are available:
             
@@ -577,7 +600,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
             
             BOUND_PROPS = <0 or 1> #default 1
         
-        This is likely not what you want if you are calculating mass functions; you should use `STRICT_SO_MASSES` instead (Section  [2.10.1](#markdown-header-commonly-used-options)).
+        This is likely not what you want if you are calculating mass functions; you should use `STRICT_SO_MASSES` instead (Section  [2.11.1](#markdown-header-commonly-used-options)).
         
         To change the default FOF refinement fraction (see the Rockstar paper),
         change:
@@ -615,7 +638,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         the box size in each dimension; the boundary regions are also assumed not to
         be overlapping (it is up to your script to check this).
         
-11. ### Full Example Scripts ###
+12. ### Full Example Scripts ###
 
     
     For full example configuration files, used for running on the Bolshoi
@@ -660,7 +683,7 @@ Rockstar is written in C, and requires no external libraries by default.  Please
     
     Note that `check_realloc_s()` is defined in `check_syscalls.h`.  It is generally a good idea to use the IO routines defined in that header, as they will automatically halt the program if they encounter any errors reading, writing, or opening files, making debugging much easier.  Routines helpful for reading Fortran-unformatted files and files encoded in a different endianness are available from `io/io_util.h`.
     
-    The particle structure is very simple; it is described in `particle.h`.  Your routine should convert everything to Rockstar's internal units: i.e., comoving Mpc/h for positions and non-comoving km/s for peculiar velocities.  Your routine should also set as many config variables as possible (e.g., `BOX_SIZE`, `PARTICLE_MASS`, cosmology, etc.) from the data header, as that will reduce the chance for errors in the analysis from incorrectly-supplied config variables.
+    The particle structure is very simple; it is described in `particle.h`.  Your routine should convert everything to Rockstar's internal units: i.e., comoving Mpc/h for positions and non-comoving km/s for peculiar velocities.  Your routine should also set as many config variables as possible (e.g., `BOX_SIZE`, `PARTICLE_MASS`, cosmology, current scale factor, etc.) from the data header, as that will reduce the chance for errors in the analysis from incorrectly-supplied config variables.
     
     Once you have created a new `io/io_mytype.c` file, you should create a corresponding header file and include it in `io/meta_io.c`.  You can then add a new condition in the `read_particles()` routine in `io/meta_io.c` to call your code when the `FILE_FORMAT` variable matches your filetype.  Finally, you should add the new `io/io_mytype.c` file to the `Makefile` so that it gets compiled along with the other Rockstar source code.
     

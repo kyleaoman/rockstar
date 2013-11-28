@@ -208,6 +208,7 @@ int64_t print_ascii_header_info(FILE *output, float *bounds, int64_t np) {
     chars += fprintf(output, "#Units: Total energy in (Msun/h)*(km/s)^2"
 		     " (physical)\n"
 	    "#Note: idx, i_so, and i_ph are internal debugging quantities\n");
+  chars += fprintf(output, "#Np is an internal debugging quantity.\n");
   chars += fprintf(output, "#Rockstar Version: %s\n", ROCKSTAR_VERSION);
   return chars;
 }
