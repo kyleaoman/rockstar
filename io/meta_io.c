@@ -19,6 +19,7 @@
 #include "io_generic.h"
 #include "io_internal.h"
 #include "io_tipsy.h"
+#include "io_arepo.h"
 #include "meta_io.h"
 #include "../distance.h"
 #include "../version.h"
@@ -116,6 +117,11 @@ void read_particles(char *filename) {
   else if (!strncasecmp(FILE_FORMAT, "TIPSY", 5)) {
     load_particles_tipsy(filename, &p, &num_p);
   }
+#ifdef ENABLE_AREPO
+  else if (!strncasecmp(FILE_FORMAT, "AREPO", 5)) {
+    load_particles_arepo(filename, &p, &num_p);
+  }
+#endif
   else {
     fprintf(stderr, "[Error] Unknown filetype %s!\n", FILE_FORMAT);
     exit(1);
