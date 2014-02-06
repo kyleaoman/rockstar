@@ -1201,7 +1201,7 @@ void client(int64_t type) {
   //struct recipient *r;
   int64_t c, s = -1, portnum, readers;
   int64_t num_nodes;
-  int stat_loc = 0;
+  //int stat_loc = 0;
 
   clear_merger_tree();
   if (FORK_READERS_FROM_WRITERS) {
@@ -1539,7 +1539,6 @@ void client(int64_t type) {
 	send_to_socket(c, "fail", 4);
 	return;
       }
-      wait(&stat_loc); //*Should* be ECHILD, but on Mac OS X is necessary...
       send_to_socket(c, "done", 4);
     }
     

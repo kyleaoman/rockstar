@@ -221,14 +221,14 @@ void output_ascii(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
   get_output_filename(buffer, 1024, snap, chunk, "ascii");
   output = check_fopen(buffer, "w");
 
-  fprintf(output, "#id num_p m%s mbound_%s r%s vmax rvmax vrms x y z vx vy vz Jx Jy Jz E Spin PosUncertainty VelUncertainty bulk_vx bulk_vy bulk_vz BulkVelUnc n_core m%s m%s m%s m%s Xoff Voff spin_bullock b_to_a c_to_a A[x] A[y] A[z] b_to_a(%s) c_to_a(%s) A[x](%s) A[y](%s) A[z](%s) Rs Rs_Klypin T/|U| idx i_so i_ph num_cp mmetric\n", MASS_DEFINITION, MASS_DEFINITION, MASS_DEFINITION, MASS_DEFINITION2, MASS_DEFINITION3, MASS_DEFINITION4, MASS_DEFINITION5, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4);
+  fprintf(output, "#id num_p m%s mbound_%s r%s vmax rvmax vrms x y z vx vy vz Jx Jy Jz E Spin PosUncertainty VelUncertainty bulk_vx bulk_vy bulk_vz BulkVelUnc n_core m%s m%s m%s m%s Xoff Voff spin_bullock b_to_a c_to_a A[x] A[y] A[z] b_to_a(%s) c_to_a(%s) A[x](%s) A[y](%s) A[z](%s) Rs Rs_Klypin T/|U| M_pe_Behroozi M_pe_Diemer idx i_so i_ph num_cp mmetric\n", MASS_DEFINITION, MASS_DEFINITION, MASS_DEFINITION, MASS_DEFINITION2, MASS_DEFINITION3, MASS_DEFINITION4, MASS_DEFINITION5, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4);
   print_ascii_header_info(output, bounds, num_p);
 
   for (i=0; i<num_halos; i++) {
     if (!_should_print(halos+i, bounds)) continue;
     th = halos+i;
     fprintf(output, "%"PRId64" %"PRId64" %.3e %.3e"
-	    " %f %f %f %f %f %f %f %f %f %f %g %g %g %g %g %f %f %f %f %f %f %"PRId64" %e %e %e %e %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %"PRId64" %"PRId64" %"PRId64" %"PRId64" %f\n", id+id_offset,
+	    " %f %f %f %f %f %f %f %f %f %f %g %g %g %g %g %f %f %f %f %f %f %"PRId64" %e %e %e %e %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %e %e %"PRId64" %"PRId64" %"PRId64" %"PRId64" %f\n", id+id_offset,
 	    th->num_p, th->m, th->mgrav, th->r,	th->vmax, th->rvmax, th->vrms,
 	    th->pos[0], th->pos[1], th->pos[2], th->pos[3], th->pos[4],
 	    th->pos[5], th->J[0], th->J[1], th->J[2], th->energy, th->spin,
@@ -238,6 +238,7 @@ void output_ascii(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
 	    th->Xoff, th->Voff, th->bullock_spin, th->b_to_a, th->c_to_a,
 	    th->A[0], th->A[1], th->A[2], th->b_to_a2, th->c_to_a2,
 	    th->A2[0], th->A2[1], th->A2[2], th->rs, th->klypin_rs, th->kin_to_pot,
+	    th->m_pe_b, th->m_pe_d,
 	    i, extra_info[i].sub_of, extra_info[i].ph, th->num_child_particles, extra_info[i].max_metric);
     id++;
   }
@@ -341,7 +342,7 @@ char *gen_merger_catalog(int64_t snap, int64_t chunk, struct halo *halos, int64_
     char buffer[1024];
     snprintf(buffer, 1024, "%s/out_%"PRId64".list", OUTBASE, snap);
     output = check_fopen(buffer, "w");
-    hchars += fprintf(output, "#ID DescID M%s Vmax Vrms R%s Rs Np X Y Z VX VY VZ JX JY JZ Spin rs_klypin M%s_all M%s M%s M%s M%s Xoff Voff spin_bullock b_to_a c_to_a A[x] A[y] A[z] b_to_a(%s) c_to_a(%s) A[x](%s) A[y](%s) A[z](%s) T/|U|\n",
+    hchars += fprintf(output, "#ID DescID M%s Vmax Vrms R%s Rs Np X Y Z VX VY VZ JX JY JZ Spin rs_klypin M%s_all M%s M%s M%s M%s Xoff Voff spin_bullock b_to_a c_to_a A[x] A[y] A[z] b_to_a(%s) c_to_a(%s) A[x](%s) A[y](%s) A[z](%s) T/|U| M_pe_Behroozi M_pe_Diemer\n",
 		      MASS_DEFINITION, MASS_DEFINITION, MASS_DEFINITION, MASS_DEFINITION2, MASS_DEFINITION3, MASS_DEFINITION4, MASS_DEFINITION5, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4, MASS_DEFINITION4);
     hchars += print_ascii_header_info(output, NULL, 0);
     fclose(output);
@@ -358,14 +359,15 @@ char *gen_merger_catalog(int64_t snap, int64_t chunk, struct halo *halos, int64_
     m = (BOUND_PROPS) ? th->mgrav : th->m;
     chars += snprintf(cur_pos, 1024, "%"PRId64" %"PRId64" %.4e %.2f %.2f %.3f %.3f %"PRId64" %.5f "
 		      "%.5f %.5f %.2f %.2f %.2f %.3e %.3e %.3e %.5f %.5f %.4e %.4e %.4e %.4e %.4e "
-		      "%.5f %.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.4f\n",
+		      "%.5f %.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.4f %.3e %.3e\n",
 	    th->id, th->desc, m, th->vmax, th->vrms, th->r, th->rs,
 	    th->num_p, th->pos[0], th->pos[1], th->pos[2], th->pos[3],
 	    th->pos[4], th->pos[5], th->J[0], th->J[1], th->J[2], th->spin,
 	    th->klypin_rs, th->m, th->alt_m[0], th->alt_m[1], th->alt_m[2],
 	    th->alt_m[3], th->Xoff, th->Voff, th->bullock_spin, th->b_to_a,
 	    th->c_to_a, th->A[0], th->A[1], th->A[2], th->b_to_a2, th->c_to_a2,
-	    th->A2[0], th->A2[1], th->A2[2], th->kin_to_pot);
+	    th->A2[0], th->A2[1], th->A2[2], th->kin_to_pot, 
+	    th->m_pe_b, th->m_pe_d);
   }
   *cat_length = chars;
   *header_length = hchars;

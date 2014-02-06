@@ -48,12 +48,13 @@ struct halo **growing_halos = NULL;
 int64_t *halo_ids = NULL;
 int64_t num_alloced_halo_ids = 0;
 
-double particle_thresh_dens[5] = {0}, particle_rvir_dens = 0;
+double particle_thresh_dens[5] = {0}, particle_rvir_dens = 0,
+  particle_rvir_dens_z0 = 0;
 int64_t min_dens_index = 0;
 double dynamical_time = 0;
 
 double vir_density(double a) {
-  double x = (Om/pow(SCALE_NOW,3))/pow(hubble_scaling(1.0/SCALE_NOW-1.0),2.0) - 1.0;
+  double x = (Om/pow(a,3))/pow(hubble_scaling(1.0/a-1.0),2.0) - 1.0;
   return ((18*M_PI*M_PI + 82.0*x - 39*x*x)/(1.0+x));
 }
 
@@ -74,6 +75,7 @@ float _calc_mass_definition(char **md) {
     if (strcasecmp(*md, "vir")) *md = "vir";
     thresh_dens = vir_density(SCALE_NOW) * cons;
   }
+  particle_rvir_dens_z0 = vir_density(1.0) * cons;
   return thresh_dens;
 }
 

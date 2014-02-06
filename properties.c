@@ -264,6 +264,35 @@ float estimate_total_energy(int64_t total_p, float *energy_ratio) {
   return ((ke - total_phi)*PARTICLE_MASS*Gc/SCALE_NOW);
 }
 
+void _calc_pseudo_evolution_masses(struct halo *h, int64_t total_p, int64_t bound)
+{
+  int64_t j, num_part = 0, num_part_pe_d = 0;
+  double r, r32, max_pe_b = 0;
+ 
+  //Typical: R_s*4.0; Minimum thresh: R_halo/5.0
+  double r_pe_d = h->rs*4.0;
+  double r_pe_b = 0;
+  if (r_pe_d < h->r/5.0) r_pe_d = h->r/5.0;
+  r_pe_d *= 1e-3;
+  for (j=0; j<total_p; j++) {
+    if (bound && (po[j].pe < po[j].ke)) continue;
+    num_part++;
+    r = sqrt(po[j].r2);
+
+    r32 = sqrt(r);
+    r32 = r32*r32*r32; //r^(3/2)
+    if ((double)(num_part*num_part) / r32 > max_pe_b) {
+      max_pe_b = (double)(num_part*num_part) / r32;
+      r_pe_b = r;
+    }
+    
+    if (r < r_pe_d) num_part_pe_d = num_part;
+  }
+  //  if (h->m > 1e13) fprintf(stderr, "%f %f\n", r_pe_b*1e3, h->rs);
+  h->m_pe_d = num_part_pe_d * PARTICLE_MASS;
+  h->m_pe_b = PARTICLE_MASS*pow(max_pe_b, 2.0/3.0)/
+    cbrt(4.0*M_PI*particle_rvir_dens_z0/3.0);
+}
 
 void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
 {
@@ -323,7 +352,7 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
   if (!bound) h->m = m;
   else h->mgrav = m;
   for (k=0; k<3; k++) vrms[k] = (parts_avgd>0) ? (vrms[k]/parts_avgd) : 0;
-  if ((bound && BOUND_PROPS) || !(bound || BOUND_PROPS)) {
+  if ((!bound) == (!BOUND_PROPS)) { //Works even if BOUND_PROPS > 1
     h->Xoff = h->Voff = 0;
     for (k=0; k<3; k++) { 
       ds = xavg[k]-h->pos[k]; h->Xoff += ds*ds;
@@ -355,6 +384,7 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
     Jh = PARTICLE_MASS*SCALE_NOW*sqrt(L[0]*L[0] + L[1]*L[1] + L[2]*L[2]);
     h->spin = (m>0) ? (Jh * sqrt(fabs(h->energy)) / (Gc*pow(m, 2.5))) : 0;
     h->bullock_spin = (m>0) ? (Jh / (mvir*sqrt(2.0*Gc*mvir*rvir*SCALE_NOW/1e3))) : 0;
+    _calc_pseudo_evolution_masses(h,total_p,bound);
   }
 }
 
