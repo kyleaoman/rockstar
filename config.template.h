@@ -72,6 +72,7 @@ integer(BOUND_PROPS, 1);
 integer(BOUND_OUT_TO_HALO_EDGE, 0);
 integer(DO_MERGER_TREE_ONLY, 0);
 integer(IGNORE_PARTICLE_IDS, 0);
+integer(EXACT_LL_CALC, 0);
 real(TRIM_OVERLAP, 0);
 real(ROUND_AFTER_TRIM, 1);
 integer(LIGHTCONE, 0);

@@ -204,6 +204,7 @@ void _find_subfofs_at_r(struct fof *f, float target_r) {
 void _find_subfofs_better2(struct fof *f,  float thresh) {
   int64_t i, j, num_test = MAX_PARTICLES_TO_SAMPLE;
   float target_r = 0;
+  if (EXACT_LL_CALC) num_test = f->num_p;
   norm_sd(f, thresh);
   fast3tree_rebuild(phasetree, f->num_p, f->particles);
   if (num_test > f->num_p) num_test = f->num_p;
@@ -533,16 +534,13 @@ void find_subs(struct fof *f) {
 
 void alloc_particle_copies(int64_t total_copies) {
   int64_t max_particle_r = MAX_PARTICLES_TO_SAMPLE;
+  if (EXACT_LL_CALC) max_particle_r = total_copies;
   if (total_copies - num_alloc_pc < 1000) total_copies = num_alloc_pc + 1000;
-  copies = check_realloc(copies, sizeof(struct particle)*total_copies,
-			 "Allocating room for particle copies.");
-  particle_halos = check_realloc(particle_halos, sizeof(int64_t)*total_copies,
-			 "Allocating room for particle halo-links.");
+  check_realloc_s(copies, sizeof(struct particle), total_copies);
+  check_realloc_s(particle_halos, sizeof(int64_t), total_copies);
   if (max_particle_r > total_copies) max_particle_r = total_copies;
-  particle_r = check_realloc(particle_r, sizeof(float)*max_particle_r,
-			 "Allocating room for particle radii.");
-  po = check_realloc(po, sizeof(struct potential)*total_copies,
-			"Allocating room for particle distances.");
+  check_realloc_s(particle_r, sizeof(float), max_particle_r);
+  check_realloc_s(po, sizeof(struct potential), total_copies);
   num_alloc_pc = total_copies;
 }
 
