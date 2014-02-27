@@ -167,7 +167,7 @@ void load_particles_arepo(char *filename, struct particle **p, int64_t *num_p)
 
   H5Fclose(HDF_FileID);
   
-  arepo_rescale_particles(*p, *num_p, TOTAL_PARTICLES);
+  arepo_rescale_particles(*p, *num_p, to_read);
   
   *num_p += npart[AREPO_DM_PARTTYPE];
 }
