@@ -19,10 +19,13 @@
 #include "io_generic.h"
 #include "io_internal.h"
 #include "io_tipsy.h"
-#include "io_arepo.h"
 #include "meta_io.h"
 #include "../distance.h"
 #include "../version.h"
+
+#ifdef ENABLE_HDF5
+#include "io_arepo.h"
+#endif /* ENABLE_HDF5 */
 
 char **snapnames = NULL;
 char **blocknames = NULL;
@@ -117,11 +120,14 @@ void read_particles(char *filename) {
   else if (!strncasecmp(FILE_FORMAT, "TIPSY", 5)) {
     load_particles_tipsy(filename, &p, &num_p);
   }
-#ifdef ENABLE_AREPO
   else if (!strncasecmp(FILE_FORMAT, "AREPO", 5)) {
+#ifdef ENABLE_HDF5
     load_particles_arepo(filename, &p, &num_p);
-  }
+#else
+    fprintf(stderr, "[Error] AREPO needs HDF5 support.  Recompile Rockstar using \"make with_hdf5\".\n");
+    exit(1);
 #endif
+  }
   else {
     fprintf(stderr, "[Error] Unknown filetype %s!\n", FILE_FORMAT);
     exit(1);

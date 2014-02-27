@@ -4,18 +4,21 @@ OFLAGS = -lm -O3 -std=c99
 DEBUGFLAGS = -lm -g -O0 -std=c99 -Dinline= 
 PROFFLAGS = -lm -g -pg -O2 -std=c99
 CC = gcc
-CFILES = rockstar.c check_syscalls.c fof.c groupies.c subhalo_metric.c potential.c nfw.c jacobi.c fun_times.c interleaving.c universe_time.c hubble.c integrate.c distance.c config_vars.c config.c bounds.c inthash.c io/read_config.c client.c server.c merger.c inet/socket.c inet/rsocket.c inet/address.c io/meta_io.c io/io_internal.c io/io_ascii.c io/stringparse.c io/io_gadget.c io/io_generic.c io/io_art.c io/io_tipsy.c io/io_bgc2.c io/io_util.c
+CFILES = rockstar.c check_syscalls.c fof.c groupies.c subhalo_metric.c potential.c nfw.c jacobi.c fun_times.c interleaving.c universe_time.c hubble.c integrate.c distance.c config_vars.c config.c bounds.c inthash.c io/read_config.c client.c server.c merger.c inet/socket.c inet/rsocket.c inet/address.c io/meta_io.c io/io_internal.c io/io_ascii.c io/stringparse.c io/io_gadget.c io/io_generic.c io/io_art.c io/io_tipsy.c io/io_bgc2.c io/io_util.c io/io_arepo.c io/io_hdf5.c
 DIST_FLAGS =
-
-## for Arepo support uncomment the following two lines (HDF5 required):
-## OFLAGS += -DH5_USE_16_API -lhdf5 -DENABLE_AREPO
-## CFILES += io/io_arepo.c 
+HDF5_FLAGS = -DH5_USE_16_API -lhdf5 -DENABLE_HDF5 -I/opt/local/include -L/opt/local/lib
 
 all:
 	@make reg EXTRA_FLAGS="$(OFLAGS)"
 
+with_hdf5:
+	@make reg EXTRA_FLAGS="$(OFLAGS) $(HDF5_FLAGS)"
+
 debug:
 	@make reg EXTRA_FLAGS="$(DEBUGFLAGS)"
+
+with_hdf5_debug:
+	@make reg EXTRA_FLAGS="$(DEBUGFLAGS) $(HDF5_FLAGS)"
 
 prof:
 	@make reg EXTRA_FLAGS="$(PROFFLAGS)"
