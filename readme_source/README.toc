@@ -1,7 +1,7 @@
 \contentsline {section}{\numberline {1}Compiling}{1}{section.1}
 \contentsline {section}{\numberline {2}Running}{2}{section.2}
 \contentsline {subsection}{\numberline {2.1}Quick start (single snapshot, single CPU)}{2}{subsection.2.1}
-\contentsline {subsection}{\numberline {2.2}More Complete Setup (multiple snapshots/input files/CPUs)}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.2}More Complete Setup (multiple snapshots/input files/CPUs)}{3}{subsection.2.2}
 \contentsline {subsection}{\numberline {2.3}Inline Analysis for Simulations}{6}{subsection.2.3}
 \contentsline {subsection}{\numberline {2.4}Output}{7}{subsection.2.4}
 \contentsline {subsection}{\numberline {2.5}Merger Trees}{8}{subsection.2.5}

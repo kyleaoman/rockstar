@@ -45,6 +45,7 @@ Science/Documentation Paper: <http://arxiv.org/abs/1110.4372>
 
 If you use the GNU C compiler version 4.0 or above on a 64-bit machine,
 compiling should be as simple as typing "`make`" at the command prompt.
+If you need HDF5 support to read in snapshots, use "`make with_hdf5`".
 
 Rockstar does not support compiling on 32-bit machines and has not been
 tested with other compilers.  Additionally, Rockstar does not support
@@ -57,9 +58,9 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     Several example configuration files have been provided.  If you have a
     small simulation file and you'd like to run Rockstar on a single processor
     to test its output, edit the file "`quickstart.cfg`" and change the file
-    format to one of `ASCII`, `GADGET`, `ART`, or `TIPSY` to match your
-    simulation file.  If you use the `ART` option, only PMss files are
-    currently supported.  (PMcrs files, which do not include particle IDs
+    format to one of `ASCII`, `GADGET`, `AREPO`, `ART`, 
+    or `TIPSY` to match your simulation file.  If you use the `ART` option,
+    only PMss files are currently supported.  (PMcrs files, which do not include particle IDs
     explicitly, are not supported).
     
     If you use `ASCII`, `ART`, or `TIPSY`, you will additionally have to set
@@ -71,7 +72,14 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     `GADGET_MASS_CONVERSION`) to convert Gadget internal units to comoving Mpc/h
     and Msun/h.
     
-    Similarly, if you use `TIPSY`, you should set the length and velocity
+    Note that `GADGET` only works with the binary GADGET formats.  For GADGET
+    as well as AREPO HDF5 snapshots, use `AREPO` for the file format.  You will then have to
+    set `AREPO_LENGTH_CONVERSION` and
+    `AREPO_MASS_CONVERSION` to convert internal snapshot units to comoving Mpc/h
+    and Msun/h, respectively.  Make sure to compile Rockstar with "`make with_hdf5`";
+    otherwise, the code will not accept these config options.
+    
+    If you use `TIPSY`, you should set the length and velocity
     conversion multipliers (`TIPSY_LENGTH_CONVERSION` and `TIPSY_MASS_CONVERSION`)
     to convert Tipsy internal units to comoving Mpc/h and physical km/s.
     Note that Tipsy format is in a _beta stage of support_---please contact
@@ -142,7 +150,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         STARTING_SNAP = <first snap> #defaults to 0
     
     If you have nonstandard names for your snapshots (e.g., "001" instead of
-    "1"), [Footnote: Since GADGET always uses "001" instead of "1" for its snapshot numbers, Rockstar will automatically use the correct formatting without needing a snapshot filename list if the particle file type is `GADGET`.] you may create a text file with one snapshot name per line and set:
+    "1"), [Footnote: Since GADGET always uses "001" instead of "1" for its snapshot numbers, Rockstar will automatically use the correct formatting without needing a snapshot filename list if the particle file type is `GADGET` or `AREPO`.] you may create a text file with one snapshot name per line and set:
     
         
         SNAPSHOT_NAMES = </path/to/snapshot names>

@@ -17,6 +17,7 @@
 \section{Compiling}
    If you use the GNU C compiler version 4.0 or above on a 64-bit machine,
    compiling should be as simple as typing ``\texttt{make}'' at the command prompt.
+   If you need HDF5 support to read in snapshots, use ``\ttt{make with\_hdf5}''.
 
    Rockstar does not support compiling on 32-bit machines and has not been
    tested with other compilers.  Additionally, Rockstar does not support
@@ -27,9 +28,9 @@
       Several example configuration files have been provided.  If you have a
       small simulation file and you'd like to run Rockstar on a single processor
       to test its output, edit the file ``\texttt{quickstart.cfg}'' and change the file
-      format to one of \texttt{ASCII}, \texttt{GADGET}, \texttt{ART}, or \texttt{TIPSY} to match your
-      simulation file.  If you use the \texttt{ART} option, only PMss files are
-      currently supported.  (PMcrs files, which do not include particle IDs
+      format to one of \texttt{ASCII}, \texttt{GADGET}, \texttt{AREPO}, \texttt{ART}, 
+      or \texttt{TIPSY} to match your simulation file.  If you use the \texttt{ART} option,
+      only PMss files are currently supported.  (PMcrs files, which do not include particle IDs
       explicitly, are not supported).
 
       If you use \texttt{ASCII}, \ttt{ART}, or \ttt{TIPSY}, you will additionally have to set
@@ -40,8 +41,15 @@
       and mass conversion multipliers are correct (\ttt{GADGET\_LENGTH\_CONVERSION} and
       \ttt{GADGET\_MASS\_CONVERSION}) to convert Gadget internal units to comoving Mpc/h
       and M$_\odot$/h.
+      
+      Note that \texttt{GADGET} only works with the binary GADGET formats.  For GADGET
+      as well as AREPO HDF5 snapshots, use \texttt{AREPO} for the file format.  You will then have to
+      set \ttt{AREPO\_LENGTH\_CONVERSION} and
+      \ttt{AREPO\_MASS\_CONVERSION} to convert internal snapshot units to comoving Mpc/h
+      and M$_\odot$/h, respectively.  Make sure to compile Rockstar with ``\ttt{make with\_hdf5}'';
+      otherwise, the code will not accept these config options.
 
-      Similarly, if you use \ttt{TIPSY}, you should set the length and velocity
+      If you use \ttt{TIPSY}, you should set the length and velocity
       conversion multipliers (\texttt{TIPSY\_LENGTH\_CONVERSION} and \texttt{TIPSY\_MASS\_CONVERSION})
       to convert Tipsy internal units to comoving Mpc/h and physical km/s.
       Note that Tipsy format is in a \textit{beta stage of support}---please contact
@@ -110,7 +118,7 @@
          STARTING_SNAP = <first snap> #defaults to 0
 \end{verbatim}  
       If you have nonstandard names for your snapshots (e.g., ``001'' instead of
-      ``1''),\footnote{Since GADGET always uses ``001'' instead of ``1'' for its snapshot numbers, Rockstar will automatically use the correct formatting without needing a snapshot filename list if the particle file type is \texttt{GADGET}.} you may create a text file with one snapshot name per line and set:
+      ``1''),\footnote{Since GADGET always uses ``001'' instead of ``1'' for its snapshot numbers, Rockstar will automatically use the correct formatting without needing a snapshot filename list if the particle file type is \texttt{GADGET} or \ttt{AREPO}.} you may create a text file with one snapshot name per line and set:
 
 \begin{verbatim}
          SNAPSHOT_NAMES = </path/to/snapshot names>
