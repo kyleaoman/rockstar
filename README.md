@@ -10,7 +10,7 @@
 # The Rockstar Halo Finder
 
 
-Most code: Copyright (C)2011-2013 Peter Behroozi
+Most code: Copyright (C)2011-2014 Peter Behroozi
 
 License: GNU GPLv3
 
@@ -327,10 +327,10 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
         DELETE_BINARY_OUTPUT_AFTER_FINISHED = 1
     
     For the binary outputs, there is a 256-byte header (detailed in
-    `io/meta_io.h`) followed by a binary dump of the halo structures
+    `io/io_internal.h`) followed by a binary dump of the halo structures
     (see `halo.h`), followed by a binary dump of the particle ids in
     each halo (type `int64_t`).  See the `load_binary_halos()` routine in
-    `io/meta_io.c` for an example of how to read in the binary files.
+    `io/io_internal.c` for an example of how to read in the binary files.
     
     To change the minimum particle size of output halos, set
         

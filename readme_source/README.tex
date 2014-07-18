@@ -7,7 +7,7 @@
 \begin{document}
 \vspace{-1ex}
 \noindent{}The Rockstar Halo Finder\\
-\noindent{}Most code: Copyright \textcopyright{}2011-2013 Peter Behroozi\\
+\noindent{}Most code: Copyright \textcopyright{}2011-2014 Peter Behroozi\\
 \noindent{}License: GNU GPLv3\\
 \noindent{}Science/Documentation Paper: \url{http://arxiv.org/abs/1110.4372}\\
 
@@ -287,10 +287,10 @@ Information about each of the columns in both file types (including units) is av
          DELETE_BINARY_OUTPUT_AFTER_FINISHED = 1
 \end{verbatim}
       For the binary outputs, there is a 256-byte header (detailed in
-      \texttt{io/meta\_io.h}) followed by a binary dump of the halo structures
+      \texttt{io/io\_internal.h}) followed by a binary dump of the halo structures
       (see \texttt{halo.h}), followed by a binary dump of the particle ids in
       each halo (type \texttt{int64\_t}).  See the \texttt{load\_binary\_halos()} routine in
-      \texttt{io/meta\_io.c} for an example of how to read in the binary files.
+      \texttt{io/io\_internal.c} for an example of how to read in the binary files.
 
       To change the minimum particle size of output halos, set
 \begin{verbatim}
