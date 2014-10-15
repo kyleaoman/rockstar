@@ -298,7 +298,7 @@ void _calc_pseudo_evolution_masses(struct halo *h, int64_t total_p, int64_t boun
 void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
 {
   int64_t j, k, part_mdelta=0, num_part=0, np_alt[4] = {0},
-    np_vir=0, dens_tot=0, parts_avgd = 0;
+    np_vir=0, dens_tot=0, parts_avgd = 0, num_part_half = 0;
   double dens_thresh = particle_thresh_dens[0]*(4.0*M_PI/3.0);
   double d1 = particle_thresh_dens[1]*(4.0*M_PI/3.0);
   double d2 = particle_thresh_dens[2]*(4.0*M_PI/3.0);
@@ -341,6 +341,8 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
     if (bound && (po[j].pe < po[j].ke)) continue;
     add_ang_mom(L, h->pos, po[j].pos);
     parts_avgd++;
+    if (parts_avgd*2 >= part_mdelta && !num_part_half)
+      num_part_half = j;
     for (k=0; k<3; k++) { //Calculate velocity and position averages
       xavg[k] += (po[j].pos[k]-xavg[k])/((double)parts_avgd);
       mdiff = po[j].pos[k+3]-vavg[k];
@@ -368,7 +370,7 @@ void _calc_additional_halo_props(struct halo *h, int64_t total_p, int64_t bound)
     h->vrms = sqrt(vrms[0] + vrms[1] + vrms[2]); 
     h->vmax = VMAX_CONST*sqrt(vmax*vmax_conv);
     h->rvmax = rvmax*1e3;
-    
+    h->halfmass_radius = sqrt(po[num_part_half].r2)*1e3;
     h->r = cbrt((3.0/(4.0*M_PI))*np_alt[2]/particle_thresh_dens[3])*1e3;
     calc_shape(h,np_alt[2],bound);
     h->b_to_a2 = h->b_to_a;

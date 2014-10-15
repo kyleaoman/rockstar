@@ -629,9 +629,10 @@ void norm_sd(struct fof *f, float thresh) {
 
   calc_deviations(corr, &sig_x, &sig_v);
   if (f->num_p == num_copies) sig_x *= INITIAL_METRIC_SCALING;
+  sig_x *= ALL_METRIC_SCALING;
+  sig_v *= ALL_METRIC_SCALING;
 
   if (!sig_x || !sig_v) return;
-
   for (i=0; i<f->num_p; i++)
     for (j=0; j<6; j++)
       f->particles[i].pos[j] /= ((j < 3) ? sig_x : sig_v);

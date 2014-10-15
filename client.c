@@ -1330,10 +1330,12 @@ void client(int64_t type) {
       assert(type == READER_TYPE);
       recv_from_socket(c, &num_proj, sizeof(int64_t));
       reset_projection_count();
-      recv_from_socket(c, prq, sizeof(struct projection_request)*num_proj);
-      if (CLIENT_DEBUG) fprintf(stderr, "Doing client projections for block %"PRId64"\n", block);
-      do_projections();
-      if (CLIENT_DEBUG) fprintf(stderr, "Done with client projections for block %"PRId64"\n", block);
+      if (num_proj) {
+	recv_from_socket(c, prq, sizeof(struct projection_request)*num_proj);
+	if (CLIENT_DEBUG) fprintf(stderr, "Doing client projections for block %"PRId64"\n", block);
+	do_projections();
+	if (CLIENT_DEBUG) fprintf(stderr, "Done with client projections for block %"PRId64"\n", block);
+      }
       send_to_socket(c, "cprj", 4);
       send_to_socket(c, &num_proj, sizeof(int64_t));
       for (i=0; i<num_proj; i++)

@@ -72,8 +72,9 @@ void send_projection_requests(struct projection *pr, int64_t num_requests) {
       }
     send_to_socket_noconfirm(clients[i].cs, "proj", 4);
     send_to_socket_noconfirm(clients[i].cs, &num_to_send, sizeof(int64_t));
-    send_to_socket_noconfirm(clients[i].cs, prq,
-		   sizeof(struct projection_request)*num_to_send);
+    if (num_to_send)
+      send_to_socket_noconfirm(clients[i].cs, prq,
+			       sizeof(struct projection_request)*num_to_send);
   }
   free(prq);
 }
