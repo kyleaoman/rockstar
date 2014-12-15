@@ -42,6 +42,11 @@ void setup_config(void) {
   if (STARTING_SNAP >= NUM_SNAPS) {
     fprintf(stderr, "[Warning] No work will be done unless NUM_SNAPS > STARTING_SNAP in config file!\n");
   }
+
+  if (NUM_READERS > NUM_BLOCKS) {
+    fprintf(stderr, "[Error] NUM_READERS must be <= NUM_BLOCKS in config file.\n");
+    exit(1);
+  }
 }
 
 void do_config(char *filename) {

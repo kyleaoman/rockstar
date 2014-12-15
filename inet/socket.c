@@ -13,6 +13,26 @@
 #include <arpa/inet.h>
 #include "socket.h"
 
+//May not work on all compilers
+#if BACKTRACE_NETWORK_ERRORS
+#include <execinfo.h>
+void print_backtrace(void)
+{
+#define MAX_BT_SIZE 128
+  void *bt[MAX_BT_SIZE];
+  int64_t i, n;
+  char **frames = NULL;
+
+  n = backtrace(bt, MAX_BT_SIZE);
+  frames = backtrace_symbols(bt, n);
+  fprintf(stderr, "[Backtrace] Obtained %zd stack frames.\n", n);
+  for (i=0; i<n; i++)
+    fprintf(stderr, "[Backtrace] %s\n", frames[i]);
+  free(frames);
+}
+#endif /* BACKTRACE_NETWORK_ERRORS */
+
+
 void *socket_check_realloc(void *ptr, size_t size, char *reason) {
   void *res = realloc(ptr, size);
   if ((res == NULL) && (size > 0)) {
@@ -28,6 +48,9 @@ void default_cb(int n) {
   char buffer[300];
   sprintf(buffer, "[Warning] Network IO Failure (PID %d)", getpid());
   perror(buffer);
+#if BACKTRACE_NETWORK_ERRORS
+  print_backtrace();
+#endif /* BACKTRACE_NETWORK_ERRORS */
 }
 
 void (*io_error_cb)(int) = default_cb;

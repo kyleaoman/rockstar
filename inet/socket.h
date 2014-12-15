@@ -2,6 +2,7 @@
 #define _INET_SOCKET_H_
 #include <stdint.h>
 
+//#define BACKTRACE_NETWORK_ERRORS 1
 #define RETRIES 10
 #define TIMEOUT 2
 
@@ -17,5 +18,9 @@ void *_recv_msg(int s, void *data, int64_t *length, int64_t offset);
 void *_recv_msg_nolength(int s, void *data);
 void set_network_io_error_cb(void (*cb)(int), int data);
 void *socket_check_realloc(void *ptr, size_t size, char *reason);
+
+#if BACKTRACE_NETWORK_ERRORS
+void print_backtrace(void);
+#endif /* BACKTRACE_NETWORK_ERRORS */
 
 #endif /* _INET_SOCKET_H_ */
