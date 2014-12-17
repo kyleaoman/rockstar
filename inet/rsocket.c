@@ -210,14 +210,31 @@ int64_t add_rsocket(struct rsocket s) {
 }
 
 void _reconnect_to_addr(struct rsocket *n) {
+  int64_t i;
   uint64_t magic = RSOCKET_VERIFY;
-  n->fd = _connect_to_addr(n->address, n->port); //Always succeeds
 
-  if (!_send_to_socket(n->fd, &(magic), sizeof(uint64_t)) || 
-      (!_send_to_socket(n->fd, &(n->magic), sizeof(uint64_t))))
-    rsocket_fatal("Couldn't send magic number over socket.");
-  if (!_recv_from_socket(n->fd, &magic, sizeof(uint64_t)))
-    rsocket_fatal("Couldn't receive magic number over socket.");
+  for (i=0; i<RETRIES; i++) {
+    random_sleep(i);
+    fprintf(stderr, "[Network] Reconnect attempt %"PRId64" to %s:%s\n",
+	    i, n->address, n->port);
+    n->fd = _connect_to_addr(n->address, n->port); //Always succeeds
+
+    if ((_send_to_socket(n->fd, &(magic), sizeof(uint64_t)) <= 0) || 
+	(_send_to_socket(n->fd, &(n->magic), sizeof(uint64_t)) <= 0)) {
+      fprintf(stderr, "[Network] Failed to send magic number to %s:%s during reconnection attempt %"PRId64"\n", n->address, n->port, i);
+      close(n->fd);
+      continue;
+    }
+
+    if (_recv_from_socket(n->fd, &magic, sizeof(uint64_t)) <= 0) {
+      fprintf(stderr, "[Network] Failed to receive magic number from %s:%s during reconnection attempt %"PRId64"\n", n->address, n->port, i);
+      close(n->fd);
+      continue;
+    }
+    break;
+  }
+  if (i == RETRIES) 
+    rsocket_fatal("Failed reconnection (too many attempts).");
   if (!n->magic) n->magic = magic;
   else if (n->magic != magic) rsocket_fatal("Couldn't reconnect to address!");  
 }
