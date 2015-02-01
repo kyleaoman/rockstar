@@ -10,6 +10,7 @@ for (@ARGV) {
 }
 die "Usage: perl $0 -c rockstar.cfg\n" unless ($config);
 $config->set_defaults(OUTBASE => ".", STARTING_SNAP => 0, PERIODIC => 1,
+		      MASS_DEFINITION => "vir",
 		      MASS_DEFINITION2 => "200b", MASS_DEFINITION3 => "200c",
 		      MASS_DEFINITION4 => "500c", MASS_DEFINITION5 => "2500c");
 
