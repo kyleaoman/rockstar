@@ -134,6 +134,8 @@ void read_particles(char *filename) {
     exit(1);
   }
 
+  if (NON_COSMOLOGICAL) { SCALE_NOW = 1; }
+
   if (LIMIT_RADIUS) {
     for (i=p_start; i<num_p; i++) {
       for (j=0, ds=0; j<3; j++) { dx = p[i].pos[j]-LIMIT_CENTER[j]; ds+=dx*dx; }

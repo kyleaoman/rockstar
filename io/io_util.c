@@ -101,3 +101,18 @@ size_t fwrite_fortran(void *ptr, size_t size, size_t nitems, FILE *stream) {
   }
   return ((size_t) nwritten);
 }
+
+void particle_range(int64_t total_p, int64_t block, int64_t num_blocks,
+		    int64_t *p_start, int64_t *to_read) {
+  int64_t particles_per_block = total_p / num_blocks;
+  int64_t extra_particles = total_p % num_blocks;
+  *p_start = particles_per_block * block;
+  *to_read = particles_per_block;
+  if (block < extra_particles) {
+    *p_start += block;
+    *to_read += 1;
+  }
+  else *p_start += extra_particles;
+  assert(*p_start <= total_p);
+  assert(*p_start + *to_read <= total_p);
+}

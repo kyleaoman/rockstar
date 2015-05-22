@@ -5,7 +5,7 @@ void factor_3(int64_t in, int64_t *factors)
     if ((in % i)==0) {
       in /= i;
       factors[n++] = i;
-      i = ceil(sqrt(fabs(in)))+1;
+      i = ceil(sqrt(llabs(in)))+1;
     }
   factors[2] = in;
 }

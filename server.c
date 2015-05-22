@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include "io/meta_io.h"
 #include "io/io_bgc2.h"
+#include "io/io_util.h"
 #include "inet/rsocket.h"
 #include "inet/address.h"
 #include "config_vars.h"
@@ -221,21 +222,22 @@ void transmit_client_info() {
 }
 
 
-void read_blocks(int64_t snap, int64_t pass) {
-  int64_t block, reader, blocks_per_reader = NUM_BLOCKS / NUM_READERS;
-  int64_t blocks_to_read = NUM_BLOCKS - NUM_READERS*pass; 
-  if (NUM_BLOCKS % NUM_READERS) blocks_per_reader++;
-  if (blocks_to_read > NUM_READERS) blocks_to_read = NUM_READERS;
-  for (reader=0; reader < NUM_READERS; reader++) {
-    block = reader*blocks_per_reader + pass;
-    if (block >= NUM_BLOCKS) break;
-    send_to_socket_noconfirm(clients[reader].cs, "snap", 4);
-    send_to_socket_noconfirm(clients[reader].cs, &snap, sizeof(int64_t));
-    send_to_socket_noconfirm(clients[reader].cs, "rdbk", 4);
-    send_to_socket_noconfirm(clients[reader].cs, &block, sizeof(int64_t));
+void read_blocks(int64_t snap)
+{
+  for (int64_t reader=0; reader<NUM_READERS; reader++) {
+    int64_t block_start, to_read, block, block_end;
+    particle_range(NUM_BLOCKS, reader, NUM_READERS, &block_start, &to_read);
+    if (!to_read) continue;
+    block_end = block_start + to_read;
+    for (block = block_start; block < block_end; block++) {
+      send_to_socket_noconfirm(clients[reader].cs, "snap", 4);
+      send_to_socket_noconfirm(clients[reader].cs, &snap, sizeof(int64_t));
+      send_to_socket_noconfirm(clients[reader].cs, "rdbk", 4);
+      send_to_socket_noconfirm(clients[reader].cs, &block, sizeof(int64_t));
+    }
   }
   timed_output("Reading %"PRId64" blocks for snapshot %"PRId64"...\n",
-	  blocks_to_read, snap);
+	  NUM_BLOCKS, snap);
 }
 
 #include "load_balance.c"
@@ -546,7 +548,7 @@ int64_t setup_server_port(void) {
 
 int server(void) {
   char buffer[1024];
-  int64_t s, snap, num_passes, i, reload_parts = 0, n;
+  int64_t s, snap, reload_parts = 0, n;
   int64_t data_size = sizeof(struct client_info)*(NUM_READERS+NUM_WRITERS);
 
   s = setup_server_port();
@@ -560,8 +562,6 @@ int server(void) {
   init_clients();
   sort_clients();
   transmit_client_info();
-  num_passes = NUM_BLOCKS / NUM_READERS;
-  if (NUM_BLOCKS % NUM_READERS) num_passes++;
   if (STARTING_SNAP > RESTART_SNAP) RESTART_SNAP = STARTING_SNAP;
   reload_parts = 1;
 
@@ -571,14 +571,14 @@ int server(void) {
     wait_for_all_ready(NUM_READERS, num_clients);
     if (!DO_MERGER_TREE_ONLY) {
       if (!PRELOAD_PARTICLES || reload_parts) {
-	for (i=0; i<num_passes; i++) read_blocks(snap, i);
+	read_blocks(snap);
 	reload_parts = 0;
       }
       decide_boundaries();
       transfer_particles();
       if (server_error_state) { reset_error(); reload_parts = 1; continue; }
       if (PRELOAD_PARTICLES && (snap < NUM_SNAPS-1)) 
-	for (i=0; i<num_passes; i++) read_blocks(snap+1, i);
+	read_blocks(snap+1);
       find_halos(snap);
       if (server_error_state) { reset_error(); reload_parts = 1; continue; }
     }
