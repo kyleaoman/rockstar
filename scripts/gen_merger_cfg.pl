@@ -116,6 +116,8 @@ HLIST_OUTBASE = "$outbase/hlists"
 BOX_DIVISIONS=$box_divisions
 BOX_WIDTH=$box_size
 
+MASS_DEFINITION = $m[0]
+
 MIN_TIMESTEPS_TRACKED = $timesteps
 MIN_TIMESTEPS_SUB_TRACKED = $sub_timesteps
 MIN_TIMESTEPS_SUB_MMP_TRACKED = $sub_timesteps
@@ -145,7 +147,7 @@ MASS_RES_OK=$mass_res_ok #Halo mass above which there are probably
 
 EXTRA_PARAMS = 23
 EXTRA_PARAM_LABELS = "Rs_Klypin M$m[0]_all M$m[1] M$m[2] M$m[3] M$m[4] Xoff Voff Spin_Bullock b_to_a c_to_a A[x] A[y] A[z] b_to_a($m[3]) c_to_a($m[3]) A[x]($m[3]) A[y]($m[3]) A[z]($m[3]) T/|U| M_pe_Behroozi M_pe_Diemer Halfmass_Radius"
-EXTRA_PARAM_DESCRIPTIONS = "#Rs_Klypin: Scale radius determined using Vmax and Mvir (see Rockstar paper)\\n#M$m[0]_all: Mass enclosed within the specified overdensity, including unbound particles (Msun/h)\\n#M$m[1]--M$m[4]: Mass enclosed within specified overdensities (Msun/h)\\n#Xoff: Offset of density peak from average particle position (kpc/h comoving)\\n#Voff: Offset of density peak from average particle velocity (km/s physical)\\n#Spin_Bullock: Bullock spin parameter (J/(sqrt(2)*GMVR))\\n#b_to_a, c_to_a: Ratio of second and third largest shape ellipsoid axes (B and C) to largest shape ellipsoid axis (A) (dimensionless).\\n#  Shapes are determined by the method in Allgood et al. (2006).\\n#  ($m[3]) indicates that only particles within R$m[3] are considered.\\n#A[x],A[y],A[z]: Largest shape ellipsoid axis (kpc/h comoving)\\n#T/|U|: ratio of kinetic to potential energies\\n#M_pe_*: Pseudo-evolution corrected masses (very experimental)\\nHalfmass_Radius: Radius within which 1/2 of M$m[0] is enclosed."
+EXTRA_PARAM_DESCRIPTIONS = "#Rs_Klypin: Scale radius determined using Vmax and Mvir (see Rockstar paper)\\n#M$m[0]_all: Mass enclosed within the specified overdensity, including unbound particles (Msun/h)\\n#M$m[1]--M$m[4]: Mass enclosed within specified overdensities (Msun/h)\\n#Xoff: Offset of density peak from average particle position (kpc/h comoving)\\n#Voff: Offset of density peak from average particle velocity (km/s physical)\\n#Spin_Bullock: Bullock spin parameter (J/(sqrt(2)*MVR))\\n#b_to_a, c_to_a: Ratio of second and third largest shape ellipsoid axes (B and C) to largest shape ellipsoid axis (A) (dimensionless).\\n#  Shapes are determined by the method in Allgood et al. (2006).\\n#  ($m[3]) indicates that only particles within R$m[3] are considered.\\n#A[x],A[y],A[z]: Largest shape ellipsoid axis (kpc/h comoving)\\n#T/|U|: ratio of kinetic to potential energies\\n#M_pe_*: Pseudo-evolution corrected masses (very experimental)\\nHalfmass_Radius: Radius within which 1/2 of M$m[0] is enclosed."
 EXTRA_PARAM_INTERPOLATIONS = "cllllllllllllllllllllc"
 
 EOL

@@ -325,11 +325,14 @@ void send_particles(int64_t c, float *bounds) {
   for (i=num_p-1; i>=0; i--) {
     for (j=0; j<num_recipients; j++)
       if (check_particle_bounds(p+i, recipients+j)) break;
-    if (!(i%PARTICLE_REALLOC_NUM)) 
+    if (!(i%PARTICLE_REALLOC_NUM)) {
       p = check_realloc(p,sizeof(struct particle)*i,"Freeing particle memory.");
+      check_mtrim();
+    }
   }
   num_p = 0;
   p = check_realloc(p,0,"Freeing particle memory.");
+  check_mtrim();
   for (j=0; j<num_recipients; j++) {
     clear_particle_rbuffer(recipients+j);
     send_to_socket(recipients[j].cs, "done", 4);
@@ -1529,6 +1532,7 @@ void client(int64_t type) {
       free_halos();
       particle_cleanup();
       clear_final_bg_data();
+      check_mtrim();
     }
 
     else if (!strcmp(cmd, "rpos")) {

@@ -340,7 +340,10 @@ void output_halos(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
 
   if (DUMP_PARTICLES[0] && (chunk >= DUMP_PARTICLES[1] &&
 			    chunk <= DUMP_PARTICLES[2]))
-    output_particles_internal(snap, chunk);
+    output_particles_internal(snap, chunk, 1);
+
+  if (WEAK_LENSING_FRACTION > 0)
+    output_particles_internal(snap, chunk, WEAK_LENSING_FRACTION);
 }
 
 

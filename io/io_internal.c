@@ -38,22 +38,39 @@ void read_binary_header_config(struct binary_output_header *bh) {
   PARTICLE_MASS = bh->particle_mass;
 }
 
-void output_particles_internal(int64_t snap, int64_t chunk) {
+void output_particles_internal(int64_t snap, int64_t chunk, double fraction) {
   char buffer[1024];
   struct binary_output_header bh;
   FILE *output;
+  int64_t i, j;
   
   memset(&bh, 0, sizeof(struct binary_output_header));
   fill_binary_header(&bh, snap, chunk);
   bh.num_particles = num_p;
   bh.particle_type = PARTICLE_TYPE_FULL;
-
   get_output_filename(buffer, 1024, snap, chunk, "rbin");
+  if (fraction>0 && fraction < 1)
+    get_output_filename(buffer, 1024, snap, chunk, "rbin_wl");
+
   output = check_fopen(buffer, "wb");
   check_fwrite(&bh, sizeof(struct binary_output_header), 1, output);
-  check_fwrite(p, sizeof(struct particle), num_p, output);
+  if (fraction==0 || fraction == 1) {
+    check_fwrite(p, sizeof(struct particle), num_p, output);
+  } else {
+    for (i=0,j=0; i<num_p; i++) {
+      if (random_unit()<fraction) {
+	check_fwrite(p+i, sizeof(struct particle), 1, output);
+	j++;
+      }
+    }
+    bh.num_particles = j;
+    bh.particle_mass /= fraction;
+    rewind(output);
+    check_fwrite(&bh, sizeof(struct binary_output_header), 1, output);
+  }
   fclose(output);
 }
+
 
 void load_particles_internal(char *filename, struct particle **part, int64_t *num_part) {
   FILE *input;

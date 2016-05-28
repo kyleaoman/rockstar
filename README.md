@@ -10,7 +10,7 @@
 # The Rockstar Halo Finder
 
 
-Most code: Copyright (C)2011-2014 Peter Behroozi
+Most code: Copyright (C)2011-2016 Peter Behroozi
 
 License: GNU GPLv3
 
@@ -268,7 +268,7 @@ non-Unix environments.  (Mac OS X is fine; Windows is not).
     compile, run "`make parents`" from the Rockstar source directory.  Then,
     run the following command
         
-        /path/to/rockstar/util/find_parents <box_size> out_XYZ.list
+        /path/to/rockstar/util/find_parents out_XYZ.list <box_size>
     
     on each halo catalog for which you want to find host halos.  Information
     about which halos are hosts and which are subs will be output as an
