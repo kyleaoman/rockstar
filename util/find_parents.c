@@ -46,6 +46,7 @@ void read_hlist(char *filename) {
       F, F, F, F, F,      //  A2[x] A2[y] A2[z] T/|U| M_PE_Behroozi
       F, F                //M_PE_Diemer Halfmass_Radius
     };
+
   enum parsetype types[NUM_INPUTS];
   void *data[NUM_INPUTS] = {&(h.id),
                             &(h.descid),

@@ -578,7 +578,7 @@ int64_t rad_partition(float *rad, int64_t left, int64_t right, int64_t pivot_ind
   for (i = left; i<si; i++) {
     if (rad[i] > pivot) { SWAP(i, si); si--; i--; }
   }
-  if (rad[si] < pivot) si++;
+  if (rad[si] <= pivot) si++;
   SWAP(right-1, si);
   return si;
 #undef SWAP

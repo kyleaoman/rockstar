@@ -122,12 +122,12 @@ struct fast3tree_results *fast3tree_results_init(void);
 
 #undef fast3tree_find_sphere
 #define fast3tree_find_sphere _F3TN(FAST3TREE_PREFIX,fast3tree_find_sphere)
-static inline void fast3tree_find_sphere(struct fast3tree *t,
+ void fast3tree_find_sphere(struct fast3tree *t,
 			   struct fast3tree_results *res, float c[FAST3TREE_DIM], float r);
 
 #undef fast3tree_find_sphere_skip
 #define fast3tree_find_sphere_skip _F3TN(FAST3TREE_PREFIX,fast3tree_find_sphere_skip)
-inline void fast3tree_find_sphere_skip(struct fast3tree *t,
+void fast3tree_find_sphere_skip(struct fast3tree *t,
 		  struct fast3tree_results *res, FAST3TREE_TYPE *tp, float r);
 
 #undef fast3tree_find_sphere_periodic
@@ -242,7 +242,7 @@ void fast3tree_free(struct fast3tree **t) {
 #undef _fast3tree_box_inside_box
 #define _fast3tree_box_inside_box \
   _F3TN(FAST3TREE_PREFIX,_fast3tree_box_inside_box)
-static inline int _fast3tree_box_inside_box(struct tree3_node *node, float b[2*FAST3TREE_DIM]) {
+ int _fast3tree_box_inside_box(struct tree3_node *node, float b[2*FAST3TREE_DIM]) {
   int i;
   for (i=0; i<FAST3TREE_DIM; i++) {
     if (node->max[i]>b[i+FAST3TREE_DIM]) return 0;
@@ -255,7 +255,7 @@ static inline int _fast3tree_box_inside_box(struct tree3_node *node, float b[2*F
 #undef _fast3tree_box_intersect_box
 #define _fast3tree_box_intersect_box \
   _F3TN(FAST3TREE_PREFIX,_fast3tree_box_intersect_box)
-static inline int _fast3tree_box_intersect_box(struct tree3_node *node, float b[2*FAST3TREE_DIM]) {
+ int _fast3tree_box_intersect_box(struct tree3_node *node, float b[2*FAST3TREE_DIM]) {
   int i;
   for (i=0; i<FAST3TREE_DIM; i++) {
     if (node->max[i]<b[i]) return 0;
@@ -269,7 +269,7 @@ static inline int _fast3tree_box_intersect_box(struct tree3_node *node, float b[
 #define _fast3tree_box_not_intersect_sphere \
   _F3TN(FAST3TREE_PREFIX,_fast3tree_box_not_intersect_sphere)
 /* Accurate, fast */
-static inline int _fast3tree_box_not_intersect_sphere(const struct tree3_node *node, const float c[FAST3TREE_DIM], const float r) {
+ int _fast3tree_box_not_intersect_sphere(const struct tree3_node *node, const float c[FAST3TREE_DIM], const float r) {
   int i;
   float d = 0, e;
   const float r2 = r*r;
@@ -288,7 +288,7 @@ static inline int _fast3tree_box_not_intersect_sphere(const struct tree3_node *n
 /* Fast, accurate. */
 #undef _fast3tree_box_inside_sphere
 #define _fast3tree_box_inside_sphere _F3TN(FAST3TREE_PREFIX,_fast3tree_box_inside_sphere)
-inline int _fast3tree_box_inside_sphere(const struct tree3_node *node, const float c[FAST3TREE_DIM], const float r) {
+int _fast3tree_box_inside_sphere(const struct tree3_node *node, const float c[FAST3TREE_DIM], const float r) {
   int i;
   float dx, dx2, dist = 0, r2 = r*r;
   if (fabs(c[0]-node->min[0]) > r) return 0; //Rapid short-circuit.
@@ -306,7 +306,7 @@ inline int _fast3tree_box_inside_sphere(const struct tree3_node *node, const flo
 
 #undef _fast3tree_sphere_inside_box
 #define _fast3tree_sphere_inside_box _F3TN(FAST3TREE_PREFIX,_fast3tree_sphere_inside_box)
-static inline int _fast3tree_sphere_inside_box(const struct tree3_node *node, const float c[FAST3TREE_DIM], const float r) {
+ int _fast3tree_sphere_inside_box(const struct tree3_node *node, const float c[FAST3TREE_DIM], const float r) {
   int i;
   for (i=0; i<FAST3TREE_DIM; i++) {
     if (c[i]-r < node->min[i]) return 0;
@@ -317,7 +317,7 @@ static inline int _fast3tree_sphere_inside_box(const struct tree3_node *node, co
 
 #undef _fast3tree_check_results_space
 #define _fast3tree_check_results_space _F3TN(FAST3TREE_PREFIX,_fast3tree_check_results_space)
-static inline void _fast3tree_check_results_space(const struct tree3_node *n, struct fast3tree_results *res) {
+ void _fast3tree_check_results_space(const struct tree3_node *n, struct fast3tree_results *res) {
   if (res->num_points + n->num_points > res->num_allocated_points) {
     res->num_allocated_points = res->num_points + n->num_points + 1000;
     res->points = _fast3tree_check_realloc(res->points, 
@@ -328,7 +328,7 @@ static inline void _fast3tree_check_results_space(const struct tree3_node *n, st
 
 #undef _fast3tree_mark_node
 #define _fast3tree_mark_node _F3TN(FAST3TREE_PREFIX,_fast3tree_mark_node)
-static inline void _fast3tree_mark_node(struct tree3_node *n, int16_t mark) {
+void _fast3tree_mark_node(struct tree3_node *n, int16_t mark) {
   n->flags = mark;
   if (n->div_dim > -1) {
     _fast3tree_mark_node(n->left, mark);
@@ -430,7 +430,7 @@ struct fast3tree_results *fast3tree_results_init(void) {
   return res;
 }
 
-static inline void fast3tree_find_sphere(struct fast3tree *t, struct fast3tree_results *res, float c[FAST3TREE_DIM], float r) {
+ void fast3tree_find_sphere(struct fast3tree *t, struct fast3tree_results *res, float c[FAST3TREE_DIM], float r) {
   res->num_points = 0;
   _fast3tree_find_sphere(t->root, res, c, r);
 }
@@ -554,7 +554,7 @@ int fast3tree_find_sphere_marked(struct fast3tree *t, struct fast3tree_results *
 
 #undef _fast3tree_find_outside_of_box
 #define _fast3tree_find_outside_of_box _F3TN(FAST3TREE_PREFIX,_fast3tree_find_outside_of_box)
-static inline void _fast3tree_find_outside_of_box(struct tree3_node *n, struct fast3tree_results *res, float b[2*FAST3TREE_DIM]) {
+ void _fast3tree_find_outside_of_box(struct tree3_node *n, struct fast3tree_results *res, float b[2*FAST3TREE_DIM]) {
   int64_t i,j;
   if (_fast3tree_box_inside_box(n, b)) return;
   if (!_fast3tree_box_intersect_box(n, b)) {
@@ -591,7 +591,7 @@ void fast3tree_find_outside_of_box(struct fast3tree *t, struct fast3tree_results
 
 #undef _fast3tree_find_inside_of_box
 #define _fast3tree_find_inside_of_box _F3TN(FAST3TREE_PREFIX,_fast3tree_find_inside_of_box)
-static inline void _fast3tree_find_inside_of_box(struct tree3_node *n, struct fast3tree_results *res, float b[2*FAST3TREE_DIM]) {
+ void _fast3tree_find_inside_of_box(struct tree3_node *n, struct fast3tree_results *res, float b[2*FAST3TREE_DIM]) {
   int64_t i,j;
   if (!_fast3tree_box_intersect_box(n, b)) return;
   if (_fast3tree_box_inside_box(n, b)) {
@@ -643,7 +643,7 @@ void fast3tree_results_free(struct fast3tree_results *res) {
 
 #undef _fast3tree_find_largest_dim
 #define _fast3tree_find_largest_dim _F3TN(FAST3TREE_PREFIX,_fast3tree_find_largest_dim)
-static inline int64_t _fast3tree_find_largest_dim(float * min, float * max) {
+ int64_t _fast3tree_find_largest_dim(float * min, float * max) {
   int64_t i, dim = FAST3TREE_DIM-1;
   float d = max[FAST3TREE_DIM-1]-min[FAST3TREE_DIM-1], d2;
   for (i=0; i<(FAST3TREE_DIM-1); i++) {
@@ -655,7 +655,7 @@ static inline int64_t _fast3tree_find_largest_dim(float * min, float * max) {
 
 #undef _fast3tree_sort_dim_pos
 #define _fast3tree_sort_dim_pos _F3TN(FAST3TREE_PREFIX,_fast3tree_sort_dim_pos)
-static inline int64_t _fast3tree_sort_dim_pos(struct tree3_node * node,
+ int64_t _fast3tree_sort_dim_pos(struct tree3_node * node,
 					      float balance) {
   int64_t dim = node->div_dim = 
     _fast3tree_find_largest_dim(node->min, node->max);
@@ -681,7 +681,7 @@ static inline int64_t _fast3tree_sort_dim_pos(struct tree3_node * node,
 
 #undef _fast3tree_find_minmax
 #define _fast3tree_find_minmax _F3TN(FAST3TREE_PREFIX,_fast3tree_find_minmax)
-static inline void _fast3tree_find_minmax(struct tree3_node *node) {
+ void _fast3tree_find_minmax(struct tree3_node *node) {
   int64_t i, j;
   float x;
   FAST3TREE_TYPE * p = node->points;
