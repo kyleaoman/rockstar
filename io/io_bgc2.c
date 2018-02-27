@@ -346,8 +346,11 @@ void output_bgc2(int64_t id_offset, int64_t snap, int64_t chunk, float *bounds)
     id++;
   }
 
-  if (STRICT_SO_MASSES)
+  if (STRICT_SO_MASSES) {
     output_binary(id_offset, snap, chunk, bounds, 0);
+    if (!strcasecmp(OUTPUT_FORMAT, "BOTH") || !strcasecmp(OUTPUT_FORMAT, "ASCII"))
+      output_ascii(id_offset, snap, chunk, bounds);
+  }
 
   if (write_bgc2_file) {
     rewind(output);
