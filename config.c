@@ -47,6 +47,11 @@ void setup_config(void) {
     fprintf(stderr, "[Error] NUM_READERS must be <= NUM_BLOCKS in config file.\n");
     exit(1);
   }
+
+  if ((strncmp(OUTPUT_FORMAT, "ASCII", 5)==0) && STRICT_SO_MASSES) {
+    fprintf(stderr, "[Warning] STRICT_SO_MASSES requires binary outputs; setting OUTPUT_FORMAT=BOTH.\n");
+    OUTPUT_FORMAT = "BOTH";
+  }
 }
 
 void do_config(char *filename) {
