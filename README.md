@@ -9,6 +9,7 @@
 
 # The Rockstar Halo Finder
 
+This version forked from <https://bitbucket.org/gfcstanford/rockstar> (commit: 89cc655331200d04af90f6d40067df6ddd3ca19d). Very slightly modified as described in this paper: <https://arxiv.org/abs/1301.6757>.
 
 Most code: Copyright (C)2011-2016 Peter Behroozi
 
