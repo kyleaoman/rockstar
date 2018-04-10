@@ -57,7 +57,7 @@ void find_parents(int64_t ngroups) {
     if (h1->id < 0) continue;
 #endif /* IGNORE_INVALID_IDS */
 
-    range = h1->RADIUS*RADIUS_CONVERSION;
+    range = h1->RADIUS*RADIUS_CONVERSION * 2.5;
 #ifndef NO_PERIODIC_BOUNDARIES
     if (max_dist < range) range = max_dist;
     fast3tree_find_sphere_periodic(halo_tree, nearest, h1->pos, range);
